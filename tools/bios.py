@@ -25,11 +25,12 @@ class Msx(Z80):
         super().__init__()
         self.carga(rom, org)
         self.org, self.fin = org, org + len(rom)
-        self.mem[0xF3E9:0xF3EC] = bytes([15, 4, 4])       # FORCLR, BAKCLR, BDRCLR
+        self.mem[0xF3E9:0xF3EC] = bytes([15, 4, 7])       # FORCLR, BAKCLR, BDRCLR (los de C-BIOS)
         self.teclas = bytearray([0xFF] * 11)
         self.stick = 0
         self.trig = 0
         self.psg = bytearray(16)
+        self.fuente = None          # los 2 KB de la fuente de la BIOS, para INIT32
 
     def _escribir(self, d, v):
         d &= 0xFFFF
@@ -62,6 +63,18 @@ class Msx(Z80):
             assert self.a == 2, "CHGMOD %d" % self.a
             v.regs[:] = SCREEN2
             v.regs[7] = self.mem[0xF3EB]
+        elif pc == 0x006F:                                # INIT32: SCREEN 1 con la fuente de la BIOS
+            v.regs[:] = bytes([0x00, 0xE0, 0x06, 0x80, 0x00, 0x36, 0x07, self.mem[0xF3E9] << 4 | self.mem[0xF3EB]])
+            assert self.fuente, "INIT32 necesita la fuente de la BIOS (Msx.fuente)"
+            v.vram[0:0x800] = self.fuente
+            v.vram[0x1800:0x1B00] = bytes([0x20]) * 0x300
+            v.vram[0x2000:0x2020] = bytes([self.mem[0xF3E9] << 4 | self.mem[0xF3EA]]) * 32
+        elif pc == 0x0072:                                # INIGRP: SCREEN 2, nombres 0-255 en cada tercio
+            v.regs[:] = SCREEN2
+            v.regs[7] = self.mem[0xF3E9] << 4 | self.mem[0xF3EB]
+            v.vram[0x1800:0x1B00] = bytes(range(256)) * 3
+            v.vram[0:0x1800] = bytes(0x1800)
+            v.vram[0x2000:0x3800] = bytes([self.mem[0xF3E9] << 4 | self.mem[0xF3EA]]) * 0x1800
         elif pc == 0x0062:                                # CHGCLR
             v.regs[7] = self.mem[0xF3EB] & 0x0F
         elif pc == 0x0041:                                # DISSCR

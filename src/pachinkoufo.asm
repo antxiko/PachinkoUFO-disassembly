@@ -4678,7 +4678,7 @@ DATA_clavos_tulipan3_datos:
 
 ; ----------------------------------------------------------------------
 ; DATOS clavos_ventana_datos: La ventana del tragaperras en el mapa: 64 lineas
-;   de 6 bytes
+;   de 6 bytes (los dos ultimos son los primeros del centro abierto)
 ;   0xb639..0xb7b7  (382 bytes)
 DATA_clavos_ventana_datos:
 	defb 000h,000h,000h,000h,000h,000h	; b639
@@ -4763,7 +4763,8 @@ DATA_clavos_centro1a_datos:
 	defb 00fh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0f0h	; b811  ..........
 
 ; ----------------------------------------------------------------------
-; DATOS clavos_centro1c_datos: Cerrado: 10 lineas de 10
+; DATOS clavos_centro1c_datos: Cerrado: 10 lineas de 10 (los dos ultimos son
+;   los primeros del siguiente)
 ;   0xb81b..0xb87d  (98 bytes)
 DATA_clavos_centro1c_datos:
 	defb 000h,000h,00fh,0ffh,0ffh,0ffh,0ffh,0f0h,000h,000h	; b81b  ..........
@@ -4779,7 +4780,7 @@ DATA_clavos_centro1c_datos:
 
 ; ----------------------------------------------------------------------
 ; DATOS clavos_centro0a_datos: El centro de la maquina 0 abierto: 17 lineas de
-;   10
+;   10 (los dos ultimos son los primeros del siguiente)
 ;   0xb87d..0xb925  (168 bytes)
 DATA_clavos_centro0a_datos:
 	defb 000h,000h,000h,000h,000h,000h,000h,000h,000h,000h	; b87d  ..........
@@ -4801,8 +4802,7 @@ DATA_clavos_centro0a_datos:
 	defb 000h,000h,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; b91d  ........
 
 ; ----------------------------------------------------------------------
-; DATOS clavos_centro0c_datos: Cerrado: 17 lineas de 10 (el ultimo byte es el
-;   primero de `pieza`)
+; DATOS clavos_centro0c_datos: Cerrado: 17 lineas de 10
 ;   0xb925..0xb9cf  (170 bytes)
 DATA_clavos_centro0c_datos:
 	defb 000h,000h,000h,0f0h,000h,000h,00fh,000h,000h,000h	; b925  ..........

@@ -793,15 +793,15 @@ D 0xB5FB 0xB61A clavos_tulipan2_datos  Otro tulipan
 F 0xB5FB 4
 D 0xB61A 0xB639 clavos_tulipan3_datos  Otro tulipan
 F 0xB61A 4
-D 0xB639 0xB7B7 clavos_ventana_datos  La ventana del tragaperras en el mapa: 64 lineas de 6 bytes
+D 0xB639 0xB7B7 clavos_ventana_datos  La ventana del tragaperras en el mapa: 64 lineas de 6 bytes (los dos ultimos son los primeros del centro abierto)
 F 0xB639 6
 D 0xB7B7 0xB81B clavos_centro1a_datos  El centro de la maquina 1 abierto: 10 lineas de 10
 F 0xB7B7 10
-D 0xB81B 0xB87D clavos_centro1c_datos  Cerrado: 10 lineas de 10
+D 0xB81B 0xB87D clavos_centro1c_datos  Cerrado: 10 lineas de 10 (los dos ultimos son los primeros del siguiente)
 F 0xB81B 10
-D 0xB87D 0xB925 clavos_centro0a_datos  El centro de la maquina 0 abierto: 17 lineas de 10
+D 0xB87D 0xB925 clavos_centro0a_datos  El centro de la maquina 0 abierto: 17 lineas de 10 (los dos ultimos son los primeros del siguiente)
 F 0xB87D 10
-D 0xB925 0xB9CF clavos_centro0c_datos  Cerrado: 17 lineas de 10 (el ultimo byte es el primero de `pieza`)
+D 0xB925 0xB9CF clavos_centro0c_datos  Cerrado: 17 lineas de 10
 F 0xB925 10
 D 0x80C0 0x80CF texto_80c0  CASIO en letras grandes, la fila de arriba (fila 4, columna 10; casillas propias) y el 0 final
 F 0x80C0 w1,12,1
