@@ -1,0 +1,1774 @@
+# PACHINKO U.F.O. (Casio, 1984) - anotaciones
+# ======================================================================
+# EL MOTOR DE SONIDO (el mismo de Ski Command, Exciting Baseball y Exciting Jockey)
+# ======================================================================
+L 0xB9CF pieza                     Pone la pieza DE en el canal B y la hace sonar
+C 0xB9D0 el canal, a su estado inicial
+C 0xB9D3 el principio de la pieza
+C 0xB9D7 suena
+L 0xB9DB canal                     HL = el canal B (0xF102 + B x 0x20), y lo deja en su estado inicial (0xBC16)
+D 0xBBFE 0xBC16 ordenes  Las doce ordenes del motor, de la 0xFF a la 0xF4
+F 0xBBFE w2
+D 0xBC16 0xBC26 canal_inicio  El estado inicial de un canal (desde +2): suena, la duracion, el volumen 15, la envolvente 0xBC3E...; la copia de 30 bytes sigue por la tabla de los periodos
+D 0xBC26 0xBC3E periodos  Los periodos de las doce notas de la octava mas baja (do a si)
+F 0xBC26 w12
+C 0xB9E0 ...de 32 en 32 bytes
+C 0xB9E3 B por 32
+C 0xB9E8 HL, el canal...
+C 0xB9E9 ...y desde +2...
+C 0xB9EC ...30 bytes de 0xBC16
+C 0xB9EF 30 bytes
+L 0xB9F8 sonido_calla              Calla el sonido: los tres canales a cero, el PSG sin ruido y los volumenes a 0
+C 0xB9F9 sin transporte
+C 0xBA08 el registro 7 del PSG (RDPSG)...
+C 0xBA0D ...los dos bits de los puertos se quedan...
+C 0xBA0F ...los tonos apagados (0x38)...
+C 0xBA14 ...WRTPSG
+C 0xBA17 los tres canales, callados
+L 0xBA28 canal_calla               El volumen del canal B a 0...
+L 0xBA29 volumen                   ...y el volumen E en el registro 8 + B del PSG
+C 0xBA2A el registro de volumen del canal
+L 0xBA30 sonido_cuadro             Un cuadro del motor: los tres canales, del 2 al 0
+C 0xBA32 empieza por el 2
+C 0xBA48 suena?
+C 0xBA4D el tempo: cada tantos cuadros...
+C 0xBA50 ...aun no
+C 0xBA51 el tempo...
+C 0xBA54 ...vuelve a su cuenta
+C 0xBA57 ...la nota acaba?...
+C 0xBA5C ...se acaba lo que suena?
+C 0xBA61 a cero, no menos
+L 0xBA69 envolvente                La envolvente: el paso que toca segun lo que le queda a la nota, y su volumen de la tabla del canal
+C 0xBA6C acabada?
+C 0xBA6F lo que le queda...
+C 0xBA72 ...por 16...
+C 0xBA79 ...entre la duracion
+C 0xBA7E ocho bits
+L 0xBA80 envolvente_div            La division, bit a bit
+C 0xBA81 el divisor...
+C 0xBA86 ...cabe?
+L 0xBA8C envolvente_bit            Un bit del cociente
+C 0xBA92 16 menos el cociente: el paso de la envolvente
+L 0xBA95 envolvente_paso           El paso: el volumen esta en la mitad alta o baja del byte de la tabla
+C 0xBA98 16: la envolvente se ha acabado
+C 0xBA9B el paso entre 2: el byte...
+C 0xBA9D el paso par o impar
+C 0xBAA1 ...de la envolvente
+C 0xBAA4 la envolvente del canal
+C 0xBAA9 el byte...
+C 0xBAAA impar: la mitad baja
+C 0xBAAC ...su mitad alta o baja
+L 0xBAB0 envolvente_volumen        El volumen del paso por el volumen del canal, entre 16
+C 0xBAB2 el volumen de la envolvente...
+C 0xBAB4 ...por el del canal
+C 0xBAB8 ocho bits
+L 0xBABA envolvente_mult           La multiplicacion, bit a bit
+L 0xBAC0 envolvente_mult_sig       El bit siguiente
+C 0xBAC3 entre 16
+C 0xBAE3 la rutina
+C 0xBAE7 a la orden
+L 0xBAE8 nota_pon                  Una nota: A el numero, E la duracion, D hasta la siguiente; duracion 0 es un silencio
+C 0xBAE8 la duracion...
+C 0xBAEB ...lo que le queda...
+C 0xBAEE ...y hasta la siguiente
+C 0xBAF1 duracion 0: silencio
+C 0xBAFA ...mas la nota
+C 0xBAFB la octava
+L 0xBAFD nota_octava               La octava: de 12 en 12
+C 0xBAFD de 12 en 12...
+C 0xBB04 ...una octava mas
+L 0xBB06 nota_periodo              El periodo de la nota (0xBC26), partido por 2 por cada octava
+C 0xBB07 la nota de la tabla...
+C 0xBB0A ...0xBC26
+C 0xBB11 las octavas de mas...
+L 0xBB15 nota_octava_baja          Una octava mas arriba
+C 0xBB15 ...el periodo a la mitad
+L 0xBB1C nota_escribe              El periodo en los registros 2B y 2B+1 del PSG
+C 0xBB1C el registro 2B...
+C 0xBB1E ...la parte baja...
+C 0xBB27 ...y la alta
+L 0xBB2A nota_envolvente           Si la envolvente es de las de tabla, desde el paso 0
+C 0xBB2A la envolvente es de tabla?
+C 0xBB30 desde el paso 0
+L 0xBB3C orden_repite              Orden 0xFC: vuelve a la marca si faltan repeticiones
+C 0xBB3C una repeticion menos...
+C 0xBB3F ...si es la ultima, sigue
+L 0xBB40 orden_vuelve              Orden 0xFD: vuelve a la marca
+C 0xBB40 la marca...
+C 0xBB46 ...por donde va
+L 0xBB46 orden_salta               Orden 0xF4: salta a DE
+L 0xBB4C orden_nada                Orden 0xFE: nada
+L 0xBB4D orden_marca               Orden 0xFB: la marca de la repeticion y cuantas veces
+C 0xBB4D cuantas veces...
+C 0xBB50 ...y la marca es por donde va
+L 0xBB5D orden_volumen             Orden 0xFA: el volumen del canal
+C 0xBB5D el volumen, de 0 a 15
+L 0xBB64 envolvente_psg            La envolvente del PSG: volumen 16 y los registros 11-13
+C 0xBB64 el volumen 16: la envolvente del PSG
+C 0xBB69 en el registro de volumen
+C 0xBB75 ...el periodo en los registros 11...
+C 0xBB7B ...y 12
+L 0xBB7F orden_envolvente          Orden 0xF9: el tipo de envolvente: del PSG o de la tabla 0xBC3E
+C 0xBB7F el tipo de envolvente...
+C 0xBB82 ...bit 4: de tabla
+C 0xBB86 la tabla: 8 bytes por envolvente...
+C 0xBB93 ...la del canal
+L 0xBB9A orden_tempo               Orden 0xF8: el tempo del canal (cuadros por paso)
+L 0xBB9E orden_transporte          Orden 0xF7: el transporte, para los tres canales
+L 0xBBA3 orden_mezcla              Orden 0xF6: tono y ruido del canal en el registro 7
+C 0xBBA3 los bits de tono y ruido del canal...
+C 0xBBA7 ...la mascara
+L 0xBBAD orden_mezcla_bit          Los bits del canal
+C 0xBBAD corridos al canal
+L 0xBBB1 orden_mezcla_pon          Los escribe
+C 0xBBB1 RDPSG 7
+C 0xBBB7 fuera los del canal...
+C 0xBBBA ...y los nuevos
+C 0xBBBD los puertos de E/S como estaban
+C 0xBBC0 WRTPSG 7
+L 0xBBC5 orden_ruido               Orden 0xF5: el periodo del ruido y una nota de ruido
+C 0xBBC5 fuera la vuelta...
+C 0xBBC7 ...y los tres bytes siguientes
+C 0xBBCB la duracion...
+C 0xBBD1 ...y hasta la siguiente
+C 0xBBD6 0: silencio
+L 0xBBDE pieza_lee                 Los tres bytes siguientes de la pieza: A, E, D
+C 0xBBDE el principio de la pieza...
+C 0xBBE4 ...mas por donde va
+C 0xBBEB tres mas
+C 0xBBF4 el canal...
+C 0xB9E1 B x 32 (tres rrca)
+C 0xB9E4 en DE
+C 0xB9E7 el canal
+C 0xB9EA desde +2
+D 0xBC3E 0xBC7E envolventes  Las ocho envolventes de tabla: 16 pasos de 4 bits (8 bytes cada una)
+F 0xBC3E 8
+#
+# LA ROM: 16 KB en la pagina 2 (0x8000-0xBFFF). La cabecera es "AB" e INIT (0x81B3); el resto, a cero.
+#
+# USA LA BIOS: INIT llama a INITIO (0x003B), SETGRP (0x007E), CLRSPR (0x0069), INIGRP (0x0072), ERAFNK
+# (0x00CC), CHGCLR (0x0062) y WRTVDP (0x0047), y lee la fuente de la BIOS por su direccion (0x0004); despues
+# usa FILVRM, LDIRVM, WRTVRM (0x004D), RDVDP (0x013E), GTTRIG (0x00D8), SNSMAT (0x0141) y WRTPSG/RDPSG.
+#
+# LA INTERRUPCION va por el gancho H.KEYI (0xFD9A), no por H.TIMI: 0x8010 lee el estado del VDP, hace el
+# cuadro y, al volver, salta dos bytes mas alla en la rutina de la BIOS que la ha llamado.
+#
+# EL JUEGO: una maquina de pachinko con un OVNI en el centro. El boton 1 sostenido carga la fuerza y al
+# soltarlo sale la bola; el boton 2 para el tragaperras de tres cifras del centro.
+#
+# LA RAM, lo que se lee en el listado:
+#   0xEC50 el record y 0xEC55 los puntos (3 bytes BCD)   0xEC59 partidas   0xEC5A la maquina (0, 1, 2: una tras otra)
+#   0xEC5B LEVEL: las vueltas a las tres maquinas (BCD)   0xEC5C la vuelta (0-2)   0xEC5D el objetivo (0-3)   0xEC5E la demostracion (0 = no)
+#   0xEC7B la fuerza (0-15)   0xEC7C la bola en el lanzador   0xEC7D las bolas (binario)
+#   0xEC85-0xEC88 el tragaperras del centro   0xECE4 las ocho bolas en juego (8 bytes cada una)
+#   0xED25 / 0xED26 los botones 1 y 2   0xED28 un contador de cuadros   0xED2A el final (1 clear, 2 sin bolas)
+#   0xED2C el objetivo (CLEAR) y 0xED2E las bolas (BCD)   0xEFFF lo que acaba la partida   0xF000 la interrupcion ocupada
+#   0xF100-0xF15F el motor de sonido
+# ======================================================================
+# LA INTERRUPCION Y LAS RUTINAS DE SERVICIO
+# ======================================================================
+D 0x8000 0x8010 cabecera  "AB", INIT (0x81B3) y el resto de la cabecera a cero
+F 0x8000 2,w,12
+L 0x8010 interrupcion              La interrupcion (H.KEYI): el estado del VDP, el cuadro y la vuelta a la BIOS dos bytes mas alla
+C 0x8010 RDVDP: lee el estado (y el VDP deja de pedir la interrupcion)
+C 0x8013 el cuadro
+C 0x8016 la vuelta a la BIOS...
+C 0x8017 ...dos bytes mas alla...
+C 0x8019 ...con A = 0...
+C 0x801A ...salta alli
+L 0x801B cuadro                    Un cuadro: el sonido (si no es la demostracion) y, si el anterior ha acabado, el juego
+C 0x801B la demostracion?
+C 0x801F no: el sonido
+C 0x8022 el cuadro anterior aun corre?
+C 0x8027 con las interrupciones abiertas
+C 0x8028 ocupado
+C 0x802C el juego
+C 0x802F la partida se acaba?
+C 0x8033 cerradas
+C 0x8035 libre
+L 0x8039 espera                    Una espera de unos 200.000 pasos (tres vueltas de 65.536), salvo en la demostracion
+C 0x8039 la demostracion?
+C 0x803E tres vueltas
+L 0x8041 espera_vuelta             ...DE desde 0...
+L 0x8043 espera_paso               ...hasta 0 otra vez
+L 0x804C ocupado                   0xF000 a 0xFF: la interrupcion no hace el juego
+L 0x8051 libre                     0xF000 a 0: la interrupcion hace el juego
+L 0x8053 ocupado_pon
+L 0x8058 boton2                    El boton 2: B del mando 1 o 2 (GTTRIG 3 y 4) o GRAPH (fila 6, bit 2), 0xFF en 0xED26
+C 0x8058 el mando 1...
+C 0x8060 ...el 2...
+C 0x8068 ...o el teclado: la fila 6 (SNSMAT)
+C 0x806D GRAPH a 0 = pulsada
+L 0x8074 boton2_pon
+L 0x8078 boton1                    El boton 1: A del mando 1 o 2 o la barra (GTTRIG 1, 2 y 0), en 0xED25
+C 0x8078 el mando 1...
+C 0x8080 ...el 2...
+C 0x8088 ...o la barra
+L 0x808C boton1_pon
+L 0x8090 texto_vram                Escribe en la VRAM el texto que va detras del "call": la direccion y las letras hasta 0x00; vuelve detras
+C 0x8090 la vuelta: los datos
+C 0x8091 la direccion de la VRAM...
+C 0x8095 ...en HL
+L 0x8096 texto_vram_letra          Una letra (WRTVRM)
+C 0x8098 0: se acaba
+L 0x80A1 texto_vram_fin            La vuelta, detras del 0
+L 0x80A3 copia_ram                 Copia a la RAM los bytes que van detras del "call": la direccion y los bytes hasta 0x1F; vuelve detras
+C 0x80A3 la vuelta: los datos
+C 0x80A4 la direccion de la RAM...
+L 0x80A9 copia_ram_byte            Un byte
+C 0x80AB 0x1F: se acaba
+L 0x80B3 copia_ram_fin             La vuelta, detras del 0x1F
+L 0x80B5 titulo                    El titulo: la pantalla en blanco, los sprites fuera, CASIO, PACHINKO-U.F.O., PUSH TRIGGER 1 TO START GAME y el copyright
+C 0x80B5 el espacio...
+C 0x80B7 ...en toda la pantalla
+C 0x80BA los sprites fuera
+L 0x8162 titulo_espera             Espera DE vueltas al boton 1; si llega a 0, la demostracion (0xEC5E = 1)
+C 0x8162 el boton 1
+C 0x8168 pulsado?
+C 0x816B una vuelta menos
+C 0x8170 nadie: la demostracion
+L 0x8175 titulo_boton              El boton: la partida, con el sonido callado
+D 0x817D 0x818D niveles  Los cuatro objetivos: las bolas que hay que hacer (binario: 400, 600, 800 y 1000) y el CLEAR en BCD
+F 0x817D 4
+D 0x818D 0x81B3 tabla_818d  Los dos bytes de cada vuelta de la maquina 2 (0xED30, 0xED31: lo que quita el OVNI malo y lo que da el bueno), y desde 0x8193 la Y y la X del lanzador por la fuerza (16 parejas)
+F 0x818D 2
+# ======================================================================
+# INIT Y LA PARTIDA
+# ======================================================================
+L 0x81B3 init                      El arranque: la pila, la interrupcion en H.KEYI, SCREEN 2, la fuente de la BIOS en los tres tercios y la partida
+C 0x81B4 la pila
+C 0x81B7 el "jp"...
+C 0x81BC ...a 0x8010...
+C 0x81BF ...en H.KEYI
+C 0x81C2 la interrupcion no hace el juego
+C 0x81C5 INITIO
+C 0x81C8 SETGRP
+C 0x81CB el sonido callado
+C 0x81CE CLRSPR
+C 0x81D1 INIGRP: SCREEN 2
+C 0x81D4 ERAFNK
+C 0x81D7 la pantalla en blanco
+C 0x81DC el color del borde: 1
+C 0x81E1 CHGCLR
+C 0x81E4 el registro 1 a 0xE2: sprites de 16 x 16
+C 0x81EA el registro 2...
+C 0x81F0 la fuente de la BIOS (la direccion de 0x0004)...
+C 0x81F3 ...2 KB...
+C 0x81F6 ...desde 0
+L 0x81F8 init_fuente               ...en los tres tercios de la tabla de patrones (LDIRVM)
+C 0x8204 hasta 0x1800
+C 0x8209 los dibujos del juego
+C 0x820C la pantalla de la maquina
+C 0x820F la RAM 0xE000-0xEFFF a cero
+C 0x821C el record: 10000 (0x01, BCD)
+C 0x8221 los dibujos de los sprites
+L 0x8224 partida_nueva             El titulo, la espera y una partida nueva
+C 0x8224 el titulo
+C 0x8236 la demostracion?
+C 0x823C una maquina al azar (0-3; la ronda pasa a la siguiente)
+L 0x8243 partida_ronda             Una ronda: la RAM de la ronda a cero y la maquina siguiente; tras las tres, otra vuelta y LEVEL + 1; tras tres vueltas, el objetivo siguiente
+C 0x8245 256 bytes desde 0xEC61
+L 0x8248 partida_borra
+C 0x824D la maquina
+C 0x8250 una partida mas
+C 0x8255 la maquina siguiente...
+C 0x8257 ...pasa de 2?
+C 0x825B la vuelta siguiente...
+C 0x8263 el objetivo siguiente (de 0 a 3)
+L 0x826D partida_vuelta
+C 0x8270 LEVEL, uno mas (BCD)
+L 0x8278 partida_nivel             Las bolas del objetivo (0x817D)
+C 0x8279 el objetivo x 4
+C 0x8285 las bolas que hay que hacer (binario)...
+C 0x828D ...y en BCD, para el CLEAR
+C 0x8294 50 bolas en BCD
+C 0x8299 50 en binario
+C 0x829E la maquina
+L 0x8300 partida_limpia
+L 0x8315 partida_marcas
+L 0x8320 partida_maq1             La maquina 1
+L 0x8328 partida_maq0             La maquina 0: en la primera partida, la musica de la salida (0xBC7E, 0xBCFA, 0xBD61)
+L 0x834D partida_pantalla
+L 0x8386 partida_textos
+L 0x83E6 partida_maq1_borra
+L 0x83F7 partida_marcador          El marcador: HIGH-SCORE, SCORE, CLEAR, las bolas y LEVEL
+L 0x8466 partida_espera            Espera al boton 1 para empezar
+L 0x8471 partida_maq2             La maquina 2: su musica (0xBE2A)
+L 0x847B partida_calla             El sonido callado
+L 0x847E partida_juega             La interrupcion hace el juego hasta que deja algo en 0xEFFF
+L 0x8481 partida_juega_espera
+C 0x8487 la interrupcion deja de hacer el juego
+C 0x848B la espera
+C 0x848F 1?
+C 0x8492 2?
+L 0x84AE game_over                 GAME OVER y su musica (0xBE76, 0xBEA7, 0xBED8); despues, el titulo
+L 0x84D5 pattern_clear             PATTERN CLEAR y su musica (0xBF03, 0xBF22, 0xBF41); la maquina 2, LEVEL CLEAR
+L 0x8515 level_clear               La maquina 2: LEVEL CLEAR y su musica (0xBF60, 0xBF79, 0xBF92); en la demostracion, al titulo
+L 0x854D cartel_game_over          Los sprites fuera y GAME OVER
+L 0x8562 espera_musica             Espera a que acabe la musica, salvo en la demostracion
+L 0x8567 espera_musica_va          ...los tres canales callados?
+L 0x8577 puntos_suena              Puntos (DE) y el sonido (0xBE5C, canal 1)
+L 0x858D bola_menos                Una bola menos: en las bolas (0xEC7D y 0xED2E) y en los puntos
+L 0x8599 bola_menos_va
+C 0x8599 una menos en binario
+C 0x85A0 una menos en BCD
+C 0x85B6 en la pantalla
+C 0x85B9 y un punto menos (BCD, tres bytes)
+L 0x85DB puntos                    DE bolas mas y DE puntos mas (salvo en un caso), y el record si se pasa
+C 0x85E6 en binario
+C 0x85F0 en BCD
+C 0x8604 en la pantalla
+C 0x8608 los puntos (BCD, tres bytes)
+C 0x8625 en la pantalla
+C 0x8628 pasa del record?
+L 0x8649 record                    El record nuevo, salvo en la demostracion
+L 0x8662 pinta_clear               El CLEAR (0xED2C) en la pantalla
+L 0x866B pinta_bolas               Las bolas (0xED2E)
+L 0x8672 pinta_dos                 Dos bytes BCD: cuatro cifras
+L 0x8683 pinta_record              El record (0xEC50)
+L 0x868C pinta_puntos              Los puntos (0xEC55)
+L 0x8693 pinta_tres                Tres bytes BCD: seis cifras
+L 0x86AC pinta_nivel               LEVEL (0xEC5B)
+L 0x86B8 pinta_byte                Las dos cifras de un byte BCD; los ceros de la izquierda en blanco
+L 0x86C7 pinta_alta
+L 0x86C8 pinta_cifra               La cifra (0x30 + n, WRTVRM)
+L 0x86CF pinta_baja                La cifra baja
+L 0x86DA pinta_baja_va
+L 0x86DB pinta_baja_cifra
+L 0x86E2 cero_blanco               Un 0 a la izquierda: en blanco (0xF0 - 0x30 = espacio), salvo la ultima cifra
+L 0x86F1 cero_fin
+# ======================================================================
+# EL CUADRO DEL JUEGO
+# ======================================================================
+L 0x86F2 juego                     Un cuadro del juego (desde la interrupcion): la demostracion, el lanzador, el centro, las bolas, el marcador y el final
+C 0x86F2 la demostracion
+C 0x86F6 un cuadro mas
+C 0x86FD cada 256 cuadros...
+C 0x86FF ...en la demostracion...
+C 0x8703 ...una cuenta mas...
+C 0x8707 ...a la 10...
+C 0x870B ...se acaba (2)
+L 0x8710 juego_demo                En la demostracion, el boton 1 la acaba
+C 0x8714 el boton 1
+C 0x871D se acaba (2)
+L 0x8723 juego_cuadro              Las partes del cuadro
+C 0x8723 el lanzador y la bola nueva
+C 0x8726 el centro abierto o cerrado
+C 0x8729 el tragaperras
+C 0x872C las bolas
+C 0x872F los molinillos
+C 0x8732 los OVNIs de la maquina 2
+C 0x8735 los sprites
+C 0x873E la fuerza en la pantalla
+C 0x8741 el record llega a 100.000?...
+C 0x8748 ...se acaba la partida (3)...
+C 0x874D ...con 99.999 (se ven cinco cifras)...
+C 0x875A ...en la pantalla
+L 0x8760 juego_mil                 Con 1000 bolas justas, nada de final
+C 0x8760 las bolas...
+C 0x8763 ...1000?
+L 0x876F juego_9000                9000 o mas: vuelven a 0
+C 0x8772 9000?
+L 0x877F juego_sin_bolas           Sin bolas: el final 2 (GAME OVER)
+L 0x878D juego_objetivo            Mas bolas que el objetivo y sin premio en marcha: el final 1 (CLEAR); la maquina 2 no tiene objetivo
+C 0x8794 las bolas, con los bytes al reves (BCD)
+C 0x879B el objetivo
+C 0x87A1 el objetivo menos las bolas
+C 0x87A6 hay premio en marcha?
+L 0x87B0 juego_final               Con un final pendiente: cuando no queda ninguna bola en juego (o pasan 192 cuadros), a 0xEFFF
+C 0x87B5 la cuenta del final
+C 0x87C0 las ocho bolas...
+L 0x87C9 juego_final_bola          ...alguna en juego?
+L 0x87CE juego_final_va            El final
+L 0x87D5 fuerza_pinta              Cada 16 cuadros, la fuerza y las bolas en la casilla del lanzador
+C 0x87D5 cada 16 cuadros
+C 0x87DB la maquina 2 no
+C 0x87E1 lo que se ha cargado...
+C 0x87E4 ...no mas de 4
+L 0x87EA fuerza_casilla            La casilla de la tabla 0xA4E7...
+C 0x87F3 ...y las bolas entre 16...
+C 0x87FC ...no mas de 10...
+L 0x8802 fuerza_sitio              ...el sitio en la pantalla
+L 0x8812 fuerza_pon                WRTVRM
+L 0x8815 molinillos                Los cuatro molinillos (0xEC64, 6 bytes): mientras les queda cuenta, giran mas deprisa al principio
+C 0x8815 la maquina 2 no tiene
+C 0x881B cuatro
+L 0x8820 molinillo                 Uno: le queda cuenta?
+C 0x8825 una menos
+C 0x8827 los dos bits altos: lo que gira
+C 0x8830 el dibujo...
+C 0x8831 ...gira (de 0 a 7)
+L 0x8835 molinillo_sig             El siguiente
+L 0x883D cuenta_ix                 Una cuenta menos en IX+3; a 0, IX+0 = 4 y otra vez 40
+L 0x884E ovnis                     La maquina 2: cada cuatro cuadros, los cinco OVNIs (0xECC5, 5 bytes) se mueven segun su estado
+C 0x884E solo la maquina 2
+C 0x8854 cada 4 cuadros
+C 0x885A los cinco OVNIs
+L 0x8860 ovni                      Uno: su estado
+C 0x8865 0: quieto
+C 0x8868 1: a la derecha
+C 0x886B 2: a la izquierda
+C 0x886E 3: espera
+C 0x8870 4 o mas: una cuenta...
+C 0x8879 ...y al azar a 1 o a 2
+L 0x8886 ovni_espera               Estado 3: la cuenta
+L 0x888B ovni_izquierda            Estado 2: a la izquierda; en X 0x30, a la derecha
+L 0x889F ovni_derecha              Estado 1: a la derecha; en X 0x90, a la izquierda
+L 0x88B1 ovni_dibujo               Cada 8 cuadros, el dibujo siguiente (0-3)
+L 0x88C1 ovni_sig                  El siguiente
+C 0x88CA el sexto: el OVNI grande
+L 0x88E4 ovni_grande_izq           A la izquierda hasta 0x44
+L 0x88F4 ovni_grande_der           A la derecha hasta 0x74
+L 0x8902 ovni_grande_dibujo        Su dibujo cada 4 cuadros
+L 0x8912 ovni_grande_altura        Su altura, de la tabla 0x8927 (32 pasos)
+D 0x8927 0x8947 ovni_alturas  Las 32 alturas del OVNI grande: sube y baja
+F 0x8927 16
+L 0x8947 cifra_azar                Una cifra al azar para el tragaperras: la casilla 0x7B-0x84 (0-9)
+C 0x8947 el registro R...
+C 0x894A ...mas la semilla...
+C 0x894F ...x 5 + 13
+C 0x8958 en BCD, las unidades
+L 0x895E tragaperras               La maquina 1: el tragaperras del centro; gira mientras tiene tiradas y el boton 2 lo para
+C 0x895E solo la maquina 1
+C 0x8964 sin premio en marcha
+C 0x8969 cada 4 cuadros
+C 0x896F tiradas?
+C 0x8974 la cuenta del giro
+C 0x8980 al empezar, el sonido del giro (0x9FC7)
+L 0x898E tragaperras_fin           A 0: una tirada menos y el sonido de parar
+L 0x89A0 tragaperras_cifras        Las tres cifras: la primera gira hasta la cuenta 16, la segunda hasta la 8, la tercera hasta 0
+L 0x89B3 tragaperras_2             La segunda
+L 0x89C4 tragaperras_3             La tercera
+C 0x89CE parada?
+C 0x89D5 el boton 2...
+C 0x89DE ...para las tres: la cuenta a 17
+L 0x89E4 tragaperras_premio        Paradas: cuantas cifras son 6 o mas; una da 1 apertura, dos dan 6 y tres el premio gordo (0x80)
+C 0x89E9 las tres cifras
+C 0x89EE 0x81: la casilla del 6
+L 0x89F6 tragaperras_premio2
+L 0x89FC tragaperras_premio3
+L 0x8A02 tragaperras_cuenta        Ninguna: nada
+L 0x8A12 tragaperras_gordo         Las tres: el sonido (0xBE49) y 0x80 aperturas
+L 0x8A1C tragaperras_abre          Las aperturas, el premio en marcha y 8 cuadros
+L 0x8A32 centro                    El centro: abierto o cerrado cada 48 cuadros mientras queden aperturas
+L 0x8A44 centro_cuenta             Un cuadro menos
+L 0x8A5F centro_suena              Al abrir, el sonido (0xBDF2, canal 2)
+L 0x8A67 centro_fin                Sin aperturas: el premio acaba (0xBE5B) y el centro se cierra
+L 0x8A7C centro_cambia             Abre o cierra: el dibujo del centro segun la maquina
+L 0x8AA8 centro_maq1              La maquina 1: a las 30 aperturas se acaba
+L 0x8AB7 centro_maq1_va
+L 0x8ABF centro_maq1_dibujo
+L 0x8ACA centro_maq0              La maquina 0
+L 0x8AD9 centro_maq0_cerrado
+L 0x8AEA centro_bolas              Las bolas que estan en el centro al cerrarse salen a un lado o al otro
+L 0x8B0B centro_bola_izq
+L 0x8B0F centro_bola_sig           La siguiente
+L 0x8B19 lanzador                  El lanzador: el boton 1 sostenido carga la fuerza (hasta 15); al soltarlo, sale una bola
+C 0x8B19 hay una bola saliendo?
+C 0x8B20 la demostracion...
+C 0x8B26 ...pulsa al azar
+C 0x8B2C el boton 1
+L 0x8B32 lanzador_boton            Pulsado: la fuerza, uno mas
+L 0x8B3E lanzador_fuerza
+L 0x8B42 lanzador_suelta           Suelto: con fuerza y sin final, una bola nueva en un hueco libre
+C 0x8B4C sale una bola
+C 0x8B51 ocho huecos
+L 0x8B59 lanzador_hueco            Un hueco libre?
+C 0x8B5D el estado
+C 0x8B60 la Y
+C 0x8B63 la X
+C 0x8B66 el dibujo
+C 0x8B69 la velocidad: hacia arriba con la fuerza...
+C 0x8B71 ...y hacia el lado
+C 0x8B74 una bola menos
+L 0x8B79 lanzador_sig              La maquina 2 solo tiene una bola
+L 0x8B83 lanzador_baja             La fuerza baja de 4 en 4 hasta 0
+L 0x8B90 lanzador_fuerza_pon
+L 0x8B94 marcas                    Tres marcas de 3 x 2 casillas en la pantalla (0x8BB3) y sus sprites
+L 0x8BB9 marca                     Una: dos filas de tres casillas
+D 0x8BB3 0x8BB9 marca_casillas  Las seis casillas de la marca
+F 0x8BB3 3
+L 0x8BD7 marca1
+D 0x8BE4 0x8BE7 marca1_casillas  Las casillas de la marca
+L 0x8BE7 marca2
+D 0x8BF4 0x8BF7 marca2_casillas  Las casillas de la marca
+L 0x8BF7 marca3
+D 0x8C04 0x8C07 marca3_casillas  Las casillas de la marca
+L 0x8C07 sprites_dibujos           Los dibujos de los sprites (0x992F, 960 bytes) a 0x3800
+# ======================================================================
+# LOS SPRITES
+# ======================================================================
+L 0x8C14 sprites                   La tabla de sprites en la RAM (0xEBD0) y a la VRAM: el lanzador segun la fuerza, los molinillos o los OVNIs, y las bolas
+C 0x8C14 la fuerza x 2...
+C 0x8C1B ...en la tabla 0x8193: la Y y la X del lanzador
+C 0x8C2A el dibujo 0x24...
+C 0x8C2D ...negro
+C 0x8C30 la maquina 2?
+C 0x8C37 los cuatro molinillos: Y, X, dibujo y color de cada uno (0xEC66)
+L 0x8C3C sprites_molinillo         Uno
+L 0x8C40 sprites_molinillo_byte    Sus cuatro bytes
+L 0x8C4C sprites_ovnis             La maquina 2: los seis OVNIs (0xECC5, 5 bytes)
+L 0x8C52 sprites_ovni              Uno: segun su estado
+C 0x8C5A 3: estallando
+C 0x8C63 su forma: 0 pequeno, 1 mediano, 2 o mas grande
+C 0x8C6E grande: tres sprites (dibujos 0x64/0x70 segun el paso)
+L 0x8C83 sprites_ovni_grande
+L 0x8CB3 sprites_ovni_color        El color: el paso + 7, o 6
+L 0x8CBE sprites_ovni_estalla      Estallando: un sprite, dibujos 0x28-0x33 segun la cuenta
+L 0x8CD6 sprites_ovni_estalla_pon
+L 0x8CDF sprites_ovni_mediano      Forma 1: tres sprites desde el dibujo 0x34 o 0x40, color 5
+L 0x8CEE sprites_ovni_pequeno      Forma 0: tres sprites desde el dibujo 0x4C o 0x58, color 13
+L 0x8CFB sprites_ovni_tres         Los tres sprites del OVNI: dibujo +4, dibujo y dibujo +8
+L 0x8D24 sprites_ovni_sig          El siguiente
+L 0x8D2E sprites_bolas             Las bolas en juego (estado 1 a 0x3F): un sprite blanco cada una, desplazado a la pantalla (Y + 4, X + 0x24)
+L 0x8D33 sprites_bola              Una
+L 0x8D50 sprites_bola_sig
+C 0x8D5C la marca de fin (0xD0)
+C 0x8D5E la tabla (0xEBD0)...
+C 0x8D61 ...a 0x1B00, 32 sprites
+# ======================================================================
+# LAS BOLAS
+# ======================================================================
+L 0x8D6B bolas                     Las ocho bolas (0xECE4, 8 bytes: estado, Y, X, dibujo, velocidad Y, velocidad X): 1 rueda, 2 dentro del centro, 3 cae en un agujero, 0x80 o mas sale del lanzador
+L 0x8D71 bola                      Una: su estado
+C 0x8D77 0: libre
+C 0x8D7C 1: rueda
+C 0x8D80 2: en el centro
+C 0x8D85 3: en un agujero
+C 0x8D88 0x80 o mas: saliendo, una cuenta hasta 0 (y a 1)
+L 0x8D8D bola_sale
+L 0x8D93 bola_rueda                Rueda: los clavos de alrededor (0x914A) la desvian; el sonido del clavo
+C 0x8D96 ha tocado alguno?
+C 0x8D9B el canal 1 libre?...
+C 0x8DA1 ...el sonido (0xBE6F)
+L 0x8DA9 bola_choque               La desviacion a la mitad (al menos 1)
+L 0x8DAA bola_choque_y             ...en Y
+L 0x8DB3 bola_choque_x             ...en X
+L 0x8DBC bola_y                    La velocidad Y: con la desviacion, rebota; y la gravedad (1, 2 por debajo de Y 0x18)
+L 0x8DCC bola_y_suma
+L 0x8DCD bola_y_gravedad
+L 0x8DD8 bola_y_pon                La velocidad y la Y nueva (velocidad / 4)
+L 0x8DF6 bola_x                    La velocidad X: rebote y un poco de azar en ciertas alturas
+L 0x8E03 bola_x_quieta
+L 0x8E06 bola_x_arriba
+L 0x8E12 bola_x_suma
+L 0x8E16 bola_x_azar
+L 0x8E25 bola_x_azar_va            +2 o -2 al azar (el registro R)
+L 0x8E30 bola_x_limite             No mas de 11 a cada lado
+L 0x8E48 bola_x_limite_izq
+L 0x8E4A bola_x_pon                La X nueva (velocidad / 4), dentro de 0 a 0x87
+L 0x8E55 bola_x_borde
+L 0x8E65 bola_fondo                El fondo de la maquina: la bola no baja de su curva (mas honda en el centro) y rueda hacia el centro
+L 0x8E6C bola_fondo_centro
+L 0x8E75 bola_fondo_lado
+L 0x8E83 bola_fondo_y
+L 0x8E99 bola_fondo_rueda          Hacia el centro: 10 o -10
+L 0x8E9C bola_maquina                 Lo que hay segun la maquina: la 1 el centro abierto, la 0 los agujeros, la 2 los OVNIs
+L 0x8EAE bola_ovni                 La maquina 2: un OVNI pequeno o mediano tocado: puntos o bolas menos, y el OVNI estalla
+L 0x8EFE bola_ovni_malo            Tocado el de forma 0: el sonido (0xBDC6) y bolas menos
+L 0x8F0A bola_ovni_resta
+L 0x8F11 bola_ovni_estalla         El OVNI estalla (3) y la bola se va
+L 0x8F21 bola_ovni_sig             El siguiente
+C 0x8F2B el sexto: el OVNI grande
+C 0x8F57 tocado: el sonido (0xBDD6), los puntos del OVNI bueno x 16, y el final 1
+L 0x8F84 bola_centro_abierto       La maquina 1 con el centro abierto: la bola que llega a su altura entra
+L 0x8FA3 bola_agujeros             Los agujeros: la bola en uno de los cuatro sitios de 0x9268 (por 16 pixeles) o en uno de los 15 de 0x9270 (por 4) salta a lo suyo
+L 0x8FB8 bola_agujero4
+L 0x8FD1 bola_agujero4_sig
+L 0x8FD4 bola_agujeros15
+L 0x8FE5 bola_agujero15
+L 0x8FFE bola_agujero15_sig
+D 0x9002 0x902A tablas_agujeros  Los saltos de los 15 agujeros (0x9004) y de los 4 molinillos (0x9022), del ultimo al primero
+F 0x9002 w2
+L 0x902A molinillo_1               Un molinillo tocado gira (0x80)
+L 0x902D molinillo_gira
+L 0x9033 molinillo_2
+L 0x9038 molinillo_3
+L 0x903D molinillo_4
+L 0x9042 agujero_tulipan1          Un tulipan: su dibujo siguiente; mete la bola
+L 0x9045 agujero_tulipan
+L 0x904E agujero_tulipan2
+L 0x9053 agujero_apertura1         La maquina 0: una apertura del centro; si no, un tulipan
+L 0x9056 agujero_apertura
+L 0x905E agujero_apertura_pon
+L 0x9068 agujero_aperturas         Las aperturas y el premio en marcha
+L 0x9070 agujero_mete
+L 0x9073 agujero_apertura2
+L 0x9078 agujero_apertura3         La maquina 0: dos aperturas
+L 0x9085 agujero_tiradas           La maquina 1: una tirada del tragaperras
+L 0x9094 agujero_9094
+L 0x9099 agujero_9099
+L 0x90A0 agujero_90a0
+L 0x90A5 agujero_90a5
+L 0x90AA agujero_90aa
+L 0x90AF agujero_centro            El centro: con el centro abierto, la bola entra (estado 2) y 0x10 bolas y puntos
+L 0x90B2 agujero_centro_va
+L 0x90CD agujero_centro2
+L 0x90D2 agujero_90d2
+L 0x90D5 agujero_90d5
+L 0x90DB agujero_90db
+L 0x90E0 agujero_v                 La V: hasta ocho, el sonido (0xBE1D) y 18 aperturas
+L 0x90FE agujero_mete_bola         La bola entra: 0x10 bolas y puntos (16 en binario, 10 en el marcador), el sonido, y 120 cuadros cayendo (estado 3)
+L 0x9113 bola_fuera                El agujero de abajo (Y 0xA0, X 0x40-0x4F): la bola se pierde
+L 0x9131 bola_dibujo               El dibujo de la bola: de 8 a 0x16, de 2 en 2
+L 0x913C bola_dibujo_pon
+L 0x913F bola_sig                  La bola siguiente
+L 0x914A clavos                    Los clavos de alrededor de la bola en el mapa de bits de 0xE000 (18 bytes por linea): DE = la desviacion en Y y en X
+L 0x917B clavos_corre
+L 0x9185 clavos_6
+L 0x918B clavos_5
+L 0x9192 clavos_l2                 La linea siguiente
+L 0x91A6 clavos_l2_corre
+L 0x91AF clavos_l2_b4
+L 0x91B7 clavos_l3
+L 0x91CA clavos_l3_corre
+L 0x91D2 clavos_l3_b4
+L 0x91D9 clavos_l4
+L 0x91EC clavos_l4_corre
+L 0x91F4 clavos_l4_b4
+L 0x91FB clavos_l5
+L 0x920E clavos_l5_corre
+L 0x9217 clavos_l5_b4
+L 0x921F clavos_l6
+L 0x9232 clavos_l6_corre
+L 0x923C clavos_l6_b6
+L 0x9242 clavos_l6_b5
+L 0x9249 clavos_fin
+L 0x924A bola_centro               Dentro del centro: 36 cuadros y 0x0A bolas y puntos (10)
+L 0x928E bola_agujero_fin          En un agujero: libre
+L 0x9295 tulipanes                 Los tulipanes (0xEC89, 4 bytes): se abren y se cierran
+L 0x92A5 tulipan
+L 0x92CD tulipan_abre
+L 0x92E0 tulipan_cierra
+L 0x92F1 tulipan_sig
+L 0x92FB tulipan_ram
+L 0x930D tulipan_vram
+D 0x9268 0x928E sitios  Los cuatro sitios de los molinillos y los quince de los agujeros (X, Y)
+F 0x9268 2
+# ======================================================================
+# LA MAQUINA EN LA PANTALLA
+# ======================================================================
+L 0x9326 maquina_maq2             La pantalla de la maquina 2 (0x9614)
+L 0x932E maquina_maq0             La pantalla de la maquina 0 (0x93A4)
+L 0x9333 maquina_maq1             La de la maquina 1: la de 0x93A4 y la ventana del tragaperras (9 filas de 5 casillas de 0x9884, en 0x18AB)
+L 0x9341 maquina_ventana           Una fila de la ventana
+L 0x935A maquina                   La maquina: la pantalla en blanco y 24 filas de 26 casillas (0x93A4)
+L 0x935D maquina_pinta             La pantalla en blanco (FILVRM) y la maquina de DE
+L 0x936F maquina_fila              Una fila de 26 casillas
+L 0x9388 centro_pinta              El dibujo del centro: A filas de 9 casillas de HL, desde la fila 9, columna 9
+L 0x938B centro_fila               Una fila
+D 0x93A4 0x9614 maquina_maq01  La pantalla de las maquinas 0 y 1: 24 filas de 26 casillas
+F 0x93A4 26
+D 0x9614 0x9884 maquina_maq2  La pantalla de la maquina 2: 24 filas de 26 casillas
+F 0x9614 26
+D 0x9884 0x98B1 ventana_tragaperras  La ventana del tragaperras de la maquina 1: 9 filas de 5 casillas
+F 0x9884 5
+D 0x98B1 0x98D5 centro_maq0_abierto  El centro de la maquina 0 abierto: 4 filas de 9 casillas
+F 0x98B1 9
+D 0x98D5 0x98F9 centro_maq0_cerrado  El centro de la maquina 0 cerrado: 4 filas de 9 casillas
+F 0x98D5 9
+D 0x98F9 0x9914 centro_maq1_abierto  El centro de la maquina 1 abierto: 3 filas de 9 casillas
+F 0x98F9 9
+D 0x9914 0x992F centro_maq1_cerrado  El centro de la maquina 1 cerrado: 3 filas de 9 casillas
+F 0x9914 9
+D 0x992F 0x9CEF sprites_dibujos_datos  Los dibujos de los sprites: 30 de 16 x 16 (960 bytes)
+F 0x992F 16
+L 0x9CEF lamparas_apaga            Las siete lamparas de la maquina (0x9D18), apagadas: la casilla 0xC3
+C 0x9CEF las direcciones
+C 0x9CF2 siete
+C 0x9CF4 la casilla 0xC3
+C 0x9CF7 dos casillas en la direccion
+C 0x9CFB la siguiente
+L 0x9D01 lampara_enciende          La lampara A encendida: la casilla 0xC9
+C 0x9D01 A x 2
+C 0x9D05 la tabla (0x9D16)
+L 0x9D0B lampara_pon               Las dos casillas de la lampara (WRTVRM)
+D 0x9D16 0x9D26 lamparas  Las direcciones de la pantalla de las lamparas
+F 0x9D16 w8
+L 0x9D26 luces                     Mientras dura la cuenta 0xED29, las luces de la maquina cambian de color cada 16 cuadros (0xA7FF o 0xA7EB)
+C 0x9D29 encendidas?
+C 0x9D2B un cuadro menos
+C 0x9D2F cada 16 cuadros...
+C 0x9D31 ...unas...
+C 0x9D36 ...u otras
+C 0x9D39 en los colores de 0x2388...
+C 0x9D3C ...diez tramos
+L 0x9D3E luces_tramo               Un tramo: el color y cuantos bytes (FILVRM)
+L 0x9D54 casillas                  Las casillas de la maquina en los tres tercios: unas tal cual y otras dos veces, tal cual y en espejo
+C 0x9D54 el primer tercio, desde la casilla 0x60...
+C 0x9D57 ...de 0x9DF7...
+C 0x9D5A ...19 casillas tal cual...
+C 0x9D5F ...y 51 con su espejo
+C 0x9D64 el segundo tercio: 40 y 60
+C 0x9D74 el tercero: 40 y 36
+L 0x9D84 casillas_colores          Sus colores, en tramos (color, cuantos bytes): 71, 134 y 92 tramos
+L 0x9DA6 colores_tramos            A tramos (color, cuantos bytes; FILVRM cada uno)
+L 0x9DBC casillas_dobles           Cada casilla de DE dos veces seguidas, C veces. Nadie la llama
+C 0x9DBC la misma casilla...
+C 0x9DBD ...en HL...
+C 0x9DC1 ...y otra vez
+L 0x9DC8 casillas_tal_cual         C casillas de DE en HL (WRTVRM)
+L 0x9DCF casilla                   Una casilla: 8 bytes
+L 0x9DDA casillas_espejo           C casillas de DE, cada una tal cual y su espejo (los bits al reves) detras
+C 0x9DDB tal cual
+C 0x9DDE otra vez la misma...
+L 0x9DE1 espejo_byte               ...un byte...
+L 0x9DE5 espejo_bit                ...con los bits al reves
+D 0x9DF7 0xA027 casillas_tercio1  Las casillas del primer tercio; en 0x9FC7, dentro, el sonido del giro del tragaperras: los mismos bytes son casillas y pieza de musica
+F 0x9DF7 8
+D 0xA027 0xA347 casillas_tercio2  Las casillas del segundo tercio
+F 0xA027 8
+D 0xA347 0xA4E7 casillas_tercio3  Las casillas del tercer tercio (la lectura sigue por la tabla de la fuerza y el codigo de 0xA507)
+F 0xA347 8
+D 0xA4E7 0xA507 fuerza_tabla  Las casillas de la fuerza en el lanzador (5) y 27 bytes mas que lee la carga de casillas
+F 0xA4E7 5,9,9,9
+L 0xA507 pantalla_borra            La tabla de nombres llena de A
+L 0xA517 sprites_fuera             El primer sprite con Y = 0xD0: ninguno se ve
+D 0xA510 0xA517 bytes_a510  Siete bytes entre dos rutinas: la carga de casillas del tercer tercio los lee como dibujo
+D 0xA51F 0xA5A7 bytes_a51f  Lo que lee la carga de casillas del tercer tercio despues del codigo
+F 0xA51F 8
+D 0xA5A7 0xA635 colores_tercio1  Los colores del primer tercio: 71 tramos (color, cuantos)
+F 0xA5A7 2
+D 0xA635 0xA741 colores_tercio2  Los colores del segundo tercio: 134 tramos
+F 0xA635 2
+D 0xA741 0xA7EB colores_tercio3  Los colores del tercer tercio: 92 tramos; los ultimos 7 son a la vez los primeros de las luces encendidas
+F 0xA741 2
+D 0xA7EB 0xA7FF luces_a  Las luces de la maquina, una de las dos formas: 10 tramos
+F 0xA7EB 2
+D 0xA7FF 0xA813 luces_b  La otra forma: 10 tramos
+F 0xA7FF 2
+L 0xA813 letras_grandes            25 casillas de 0xA9AF a la VRAM DE y su color A en 256 bytes
+L 0xA82A letras                    Las letras propias: las grandes del titulo (dos colores) y las cifras y las mayusculas en los tres tercios
+C 0xA82A las grandes, a la casilla 1...
+C 0xA82D ...cian sobre negro (0x71)
+C 0xA832 en el segundo tercio...
+C 0xA835 ...azul sobre negro (0x41)
+C 0xA83A las cifras y las letras, en los tres tercios
+L 0xA849 letras_tercio             Las diez cifras (casilla 0x30) y 28 letras (0x40) de 0xA881, y su color blanco sobre negro (0xF1)
+D 0xA881 0xA9AF letras_datos  Las cifras 0-9 y las letras de la 0x40 a la 0x5B (8 bytes cada una)
+F 0xA881 8
+D 0xA9AF 0xAA77 letras_grandes_datos  Las 25 casillas de las letras grandes de CASIO y PACHINKO-U.F.O. (la tabla de antes acaba en sus dos primeros bytes)
+F 0xA9AF 8
+L 0xAA77 clavos_maq2             El mapa de los clavos de la maquina 2 (0xB083)
+L 0xAA7C clavos_maq01             El de las maquinas 0 y 1 (0xAB4F)
+L 0xAA7F clavos_monta              El mapa de bits de los clavos en 0xE000: 147 lineas de 18 bytes, la mitad izquierda de la ROM y la derecha en espejo
+C 0xAA80 0xBD0 bytes...
+L 0xAA86 clavos_borra              ...a cero
+C 0xAA8F desde la linea 2
+C 0xAA92 147 lineas
+L 0xAA94 clavos_linea              Una: 9 bytes tal cual...
+L 0xAA96 clavos_byte
+C 0xAA9D ...y los mismos 9 al reves, con los bits al reves
+L 0xAA9F clavos_espejo
+L 0xAAA4 clavos_espejo_bit
+L 0xAAB4 clavos_maq1              La maquina 1: el de las maquinas 0 y 1, la ventana del tragaperras (0xB639) y tres postes (0xB5B5)
+L 0xAABF clavos_ventana
+L 0xAAC1 clavos_ventana_byte
+L 0xAAE1 clavos_centro_cerrado1    El centro de la maquina 1 cerrado en el mapa (0xB81B)
+L 0xAAE6 clavos_centro_abierto1    Abierto (0xB7B7)
+L 0xAAE9 clavos_centro1            10 lineas de 10 bytes en 0xE5A4
+L 0xAAEE clavos_copia10
+L 0xAB0C clavos_centro_cerrado0    El centro de la maquina 0 cerrado (0xB925)
+L 0xAB11 clavos_centro_abierto0    Abierto (0xB87D)
+L 0xAB14 clavos_centro0            17 lineas de 10 bytes en 0xE4CC
+L 0xAB1B clavos_tulipan1           Un tulipan en el mapa (0xB5DC, 8 lineas de 4)
+L 0xAB20 clavos_tulipan2           Otro (0xB5FB)
+L 0xAB25 clavos_tulipan3           Otro (0xB61A)
+L 0xAB28 clavos_copia4
+L 0xAB2A clavos_copia4_linea
+L 0xAB3C clavos_poste              Un poste en el mapa (0xB5B5, 20 lineas de 2 bytes)
+L 0xAB41 clavos_poste_linea
+D 0xAB4F 0xB07A clavos_maq01_datos  El mapa de los clavos de las maquinas 0 y 1: 147 lineas de 9 bytes (la mitad izquierda)
+F 0xAB4F 9
+D 0xB07A 0xB083 clavos_maq01_resto  Nueve bytes mas, una linea 148 que no se lee
+F 0xB07A 9
+D 0xB083 0xB5AE clavos_maq2_datos  El mapa de la maquina 2: 147 lineas de 9 bytes
+F 0xB083 9
+D 0xB5AE 0xB5B5 clavos_maq2_resto  Siete bytes que no se leen
+D 0xB5B5 0xB5DC clavos_poste_datos  El poste en el mapa: 20 lineas de 2 bytes (el ultimo es el primero del tulipan)
+F 0xB5B5 2
+D 0xB5DC 0xB5FB clavos_tulipan1_datos  Un tulipan: 8 lineas de 4 (el ultimo byte es el primero del siguiente)
+F 0xB5DC 4
+D 0xB5FB 0xB61A clavos_tulipan2_datos  Otro tulipan
+F 0xB5FB 4
+D 0xB61A 0xB639 clavos_tulipan3_datos  Otro tulipan
+F 0xB61A 4
+D 0xB639 0xB7B7 clavos_ventana_datos  La ventana del tragaperras en el mapa: 64 lineas de 6 bytes
+F 0xB639 6
+D 0xB7B7 0xB81B clavos_centro1a_datos  El centro de la maquina 1 abierto: 10 lineas de 10
+F 0xB7B7 10
+D 0xB81B 0xB87D clavos_centro1c_datos  Cerrado: 10 lineas de 10
+F 0xB81B 10
+D 0xB87D 0xB925 clavos_centro0a_datos  El centro de la maquina 0 abierto: 17 lineas de 10
+F 0xB87D 10
+D 0xB925 0xB9CF clavos_centro0c_datos  Cerrado: 17 lineas de 10 (el ultimo byte es el primero de `pieza`)
+F 0xB925 10
+D 0x80C0 0x80CF texto_80c0  CASIO en letras grandes, la fila de arriba (fila 4, columna 10; casillas propias) y el 0 final
+F 0x80C0 w1,12,1
+D 0x80D2 0x80E1 texto_80d2  CASIO en letras grandes, la fila de abajo (fila 5) y el 0 final
+F 0x80D2 w1,12,1
+D 0x80E4 0x8101 texto_80e4  PACHINKO-U.F.O. en letras grandes, la fila de arriba (fila 8, columna 3) y el 0 final
+F 0x80E4 w1,26,1
+D 0x8104 0x8122 texto_8104  PACHINKO-U.F.O., la fila de abajo (fila 9) y el 0 final
+F 0x8104 w1,27,1
+D 0x8125 0x8144 texto_8125  El texto de "call 0x8090": fila 14, columna 2 de la pantalla, "PUSH TRIGGER 1 TO START GAME" y el 0 final
+F 0x8125 w1,28,1
+D 0x8147 0x8160 texto_8147  El texto de "call 0x8090": fila 22, columna 5 de la pantalla, "COPYRIGHT 1984 @ CASIO" y el 0 final
+F 0x8147 w1,22,1
+D 0x822A 0x8236 copia_822a  Los bytes de "call 0x80A3": 9 bytes a 0xEC55 y el 0x1F final
+F 0x822A w1,9,1
+D 0x82B7 0x82D9 copia_82b7  Los bytes de "call 0x80A3": 31 bytes a 0xECC5 y el 0x1F final
+F 0x82B7 w1,31,1
+D 0x8389 0x83A4 copia_8389  Los bytes de "call 0x80A3": 24 bytes a 0xEC63 y el 0x1F final
+F 0x8389 w1,24,1
+D 0x83A7 0x83E6 copia_83a7  Los bytes de "call 0x80A3": 60 bytes a 0xEC89 y el 0x1F final
+F 0x83A7 w1,60,1
+D 0x8404 0x840C texto_8404  El texto de "call 0x8090": fila 1, columna 26 de la pantalla, "HIGH-" y el 0 final
+F 0x8404 w1,5,1
+D 0x840F 0x8417 texto_840f  El texto de "call 0x8090": fila 2, columna 26 de la pantalla, "SCORE" y el 0 final
+F 0x840F w1,5,1
+D 0x8498 0x84AE texto_8498  El texto de "call 0x8090": fila 9, columna 4 de la pantalla, "YOU WIN THE GAME!" y el 0 final
+F 0x8498 w1,19,1
+D 0x84FD 0x850F texto_84fd  El texto de "call 0x8090": fila 10, columna 6 de la pantalla, "PATTERN CLEAR" y el 0 final
+F 0x84FD w1,15,1
+D 0x8537 0x8547 texto_8537  El texto de "call 0x8090": fila 10, columna 7 de la pantalla, "LEVEL CLEAR" y el 0 final
+F 0x8537 w1,13,1
+D 0x8553 0x8561 texto_8553  El texto de "call 0x8090": fila 10, columna 8 de la pantalla, "GAME OVER" y el 0 final
+F 0x8553 w1,11,1
+D 0x841A 0x8422 texto_841a  El texto de "call 0x8090": fila 6, columna 26 de la pantalla, "SCORE" y el 0 final
+F 0x841A w1,5,1
+D 0x8425 0x842D texto_8425  El texto de "call 0x8090": fila 12, columna 26 de la pantalla, "CLEAR" y el 0 final
+F 0x8425 w1,5,1
+D 0x8430 0x8435 texto_8430  La caja de las bolas: las casillas 0x78 y 0x79 en la fila 16, columna 28, y el 0 final
+F 0x8430 w1,2,1
+D 0x8438 0x8440 texto_8438  El texto de "call 0x8090": fila 20, columna 26 de la pantalla, "LEVEL" y el 0 final
+F 0x8438 w1,5,1
+D 0xBC7E 0xBCFA musica_salida_a  La musica de la primera partida, canal 0; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBC7E 3
+D 0xBCFA 0xBD61 musica_salida_b  canal 1; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBCFA 3
+D 0xBD61 0xBDB6 musica_salida_c  canal 2; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBD61 3
+D 0xBDB6 0xBDC6 sonido_ovni  Un OVNI tocado (canal 2); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBDB6 3
+D 0xBDC6 0xBDD6 sonido_ovni_malo  El OVNI que quita bolas (canal 2); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBDC6 3
+D 0xBDD6 0xBDF2 sonido_ovni_grande  El OVNI grande (canal 2); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBDD6 3
+D 0xBDF2 0xBE1D sonido_abre  El centro se abre (canal 2); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBDF2 3
+D 0xBE1D 0xBE2A sonido_v  La V (canal 0); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBE1D 3
+D 0xBE2A 0xBE49 musica_maq2  La musica de la maquina 2 (canal 0); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBE2A 3
+D 0xBE49 0xBE5B sonido_gordo  El premio gordo del tragaperras (canal 0); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBE49 3
+D 0xBE5B 0xBE5C silencio  Una pieza que acaba en el primer grupo: calla el canal; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBE5B 3
+D 0xBE5C 0xBE6F sonido_puntos  Puntos (canal 1); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBE5C 3
+D 0xBE6F 0xBE76 sonido_clavo  La bola contra un clavo (canal 1); grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBE6F 3
+D 0xBE76 0xBEA7 musica_game_over_a  GAME OVER (tambien despues de YOU WIN THE GAME!), canal 0; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBE76 3
+D 0xBEA7 0xBED8 musica_game_over_b  canal 1; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBEA7 3
+D 0xBED8 0xBF03 musica_game_over_c  canal 2; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBED8 3
+D 0xBF03 0xBF22 musica_pattern_clear_a  PATTERN CLEAR, canal 0; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBF03 3
+D 0xBF22 0xBF41 musica_pattern_clear_b  canal 1; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBF22 3
+D 0xBF41 0xBF60 musica_pattern_clear_c  canal 2; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBF41 3
+D 0xBF60 0xBF79 musica_level_clear_a  LEVEL CLEAR de la maquina 2, canal 0; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBF60 3
+D 0xBF79 0xBF92 musica_level_clear_b  canal 1; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBF79 3
+D 0xBF92 0xBFDA musica_level_clear_c  canal 2; grupos de tres bytes (nota, duracion, espera) u ordenes
+F 0xBF92 3
+D 0xBFDA 0xC000 relleno  Tres bytes (0x79, 0, 0) y 0xFF hasta el final de la ROM
+F 0xBFDA 16
+C 0x8227 el record a 0, los puntos a 0 y el resto (0xEC55)
+C 0x8239 no: la maquina que haya
+C 0x823E de 0 a 3
+C 0x8243 256 bytes
+C 0x8248 a cero
+C 0x824B todos
+C 0x8253 una mas
+C 0x8256 la maquina + 1...
+C 0x8259 ...0, 1 o 2: sigue
+C 0x825E la vuelta + 1...
+C 0x825F ...pasa de 2?
+C 0x8266 el siguiente...
+C 0x8267 ...de 0 a 3
+C 0x826C la vuelta 0
+C 0x8271 LEVEL...
+C 0x8272 ...+ 1...
+C 0x8274 ...en BCD
+C 0x8277 la maquina 0
+C 0x827C x 4
+C 0x8281 la tabla de objetivos
+C 0x8287 (los bytes en orden)
+C 0x8289 en 0xEC61
+C 0x8290 en 0xED2C
+C 0x8296 en 0xED2F (las bolas, BCD)
+C 0x829B en 0xEC7D (las bolas)
+C 0x82A1 la maquina 0?
+C 0x82A5 la maquina 1?
+C 0x82AA la maquina 2: su maquina
+C 0x82AD sin objetivo
+C 0x82B4 los seis OVNIs (0xECC5)
+C 0x82D9 la vuelta x 2...
+C 0x82DD ...en la tabla 0x818D
+C 0x82E6 lo que quita el OVNI malo
+C 0x82EA los puntos del OVNI bueno
+C 0x82ED objetivo + 2 OVNIs: los demas fuera
+C 0x82F3 x 5 bytes
+C 0x82F9 desde el primero que sobra...
+C 0x82FD ...hasta el OVNI grande
+C 0x8300 a cero
+C 0x8303 DCOMPR: HL < DE?
+C 0x8308 el objetivo
+C 0x830B 1 golpe al OVNI grande, en los objetivos 0 y 1
+C 0x8312 2 en los objetivos 2 y 3
+C 0x8316 los golpes que hacen falta
+C 0x831A y el OVNI grande se mueve o no
+C 0x8320 la maquina de la maquina 1
+C 0x8323 sus tres marcas
+C 0x8328 la maquina de la maquina 0
+C 0x832B la primera partida?
+C 0x8332 su musica: el canal 0...
+C 0x833D ...el 1...
+C 0x8345 ...y el 2
+C 0x834D la vuelta 1 o 2...
+C 0x8354 ...mas clavos en el mapa: cuatro lineas...
+C 0x835E ...con un bit mas cada una
+C 0x8366 y cuatro mas al otro lado
+C 0x8375 la vuelta 1...
+C 0x837B ...no: tres bytes mas del mapa
+C 0x8386 los molinillos (0xEC63)
+C 0x83A4 los tulipanes y agujeros (0xEC89)
+C 0x83E6 la maquina 1?
+C 0x83ED 20 bytes de 0xECB1...
+C 0x83F2 ...a cero
+C 0x83F7 las ocho bolas...
+C 0x83FA ...64 bytes...
+C 0x83FD ...a cero
+C 0x8401 HIGH-
+C 0x840C SCORE
+C 0x8417 SCORE
+C 0x8422 CLEAR
+C 0x842D la caja de las bolas
+C 0x8435 LEVEL
+C 0x8440 las cifras
+C 0x844F los sprites
+C 0x8452 sin final
+C 0x8456 el centro cerrado
+C 0x8459 la maquina 2?
+C 0x8460 la demostracion?
+C 0x8466 el boton 1
+C 0x846C pulsado?
+C 0x8471 el canal 0...
+C 0x8473 ...la musica de la maquina 2
+C 0x847B el sonido callado
+C 0x847E la interrupcion hace el juego
+C 0x8481 hasta que hay un final
+C 0x848A el final
+C 0x848E 1: CLEAR (0x84D5)
+C 0x8490 ...a 0x84D5
+C 0x8493 2: GAME OVER (0x84AE); 3: YOU WIN THE GAME! y despues GAME OVER
+C 0x8495 YOU WIN THE GAME!
+C 0x84AE el sonido callado
+C 0x84B1 su musica: el canal 0...
+C 0x84B9 ...el 1...
+C 0x84C1 ...y el 2
+C 0x84C9 el cartel del centro
+C 0x84CC espera a que acabe
+C 0x84CF y un rato mas
+C 0x84D2 al titulo
+C 0x84D5 el sonido callado
+C 0x84D8 los sprites fuera
+C 0x84DB la maquina 2?
+C 0x84E0 si: LEVEL CLEAR (0x8515)
+C 0x84E2 la musica: el canal 0...
+C 0x84EA ...el 1...
+C 0x84F2 ...y el 2
+C 0x84FA PATTERN CLEAR
+C 0x850F espera a que acabe
+C 0x8512 la ronda siguiente
+C 0x8515 la demostracion?
+C 0x8519 si: al titulo
+C 0x851C la musica: el canal 0...
+C 0x8524 ...el 1...
+C 0x852C ...y el 2
+C 0x8534 LEVEL CLEAR
+C 0x8547 espera a que acabe
+C 0x854A la ronda siguiente
+C 0x854D los sprites fuera
+C 0x8550 GAME OVER
+C 0x8562 la demostracion no espera
+C 0x8567 el canal 0 suena?...
+C 0x856B ...el 1...
+C 0x8570 ...el 2
+C 0x8574 espera
+C 0x8577 lo de quien llama
+C 0x857C las bolas y los puntos
+C 0x857F el canal 1...
+C 0x8581 ...el sonido
+C 0x8587 lo de quien llama
+C 0x858D lo de quien llama
+C 0x8591 una bola menos
+C 0x859C una menos...
+C 0x859D ...en 0xEC7D
+C 0x85A4 el byte bajo...
+C 0x85A7 ...menos 1...
+C 0x85A9 ...en BCD
+C 0x85AD el alto, con el acarreo
+C 0x85BD el byte bajo
+C 0x85C6 el de en medio
+C 0x85CF el alto
+C 0x85D8 en la pantalla
+C 0x85DB el final pendiente...
+C 0x85DF ...mas la maquina...
+C 0x85E3 ...4: nada
+C 0x85E7 las bolas en binario...
+C 0x85EA ...+ DE
+C 0x85EF y en BCD: DE se suma tal cual como BCD (0x10 son 16 en binario y 10 en el marcador)
+C 0x85F4 el byte bajo...
+C 0x85F7 ...+ L...
+C 0x85F8 ...BCD
+C 0x85FC el alto, + H con el acarreo
+C 0x8607 lo mismo en los puntos
+C 0x860C el byte bajo
+C 0x8614 el de en medio
+C 0x861C el alto
+C 0x862C contra el record
+C 0x8630 el byte alto: menor?
+C 0x8637 mayor: record
+C 0x8639 el de en medio
+C 0x8642 el bajo
+C 0x8649 en la demostracion no
+C 0x864E los puntos...
+C 0x8654 ...son el record...
+C 0x865D ...nuevo
+C 0x8660 en la pantalla
+C 0x8662 en la fila 14, columna 27
+C 0x8665 el CLEAR
+C 0x866B en la fila 18, columna 27
+C 0x866E las bolas
+C 0x8672 aun sin cifras
+C 0x8674 el byte alto...
+C 0x8677 ...no es el ultimo
+C 0x867C el bajo...
+C 0x867F ...el ultimo
+C 0x8683 en la fila 4, columna 26
+C 0x8686 el record
+C 0x868C en la fila 8, columna 26
+C 0x868F los puntos
+C 0x8693 aun sin cifras
+C 0x8695 el byte alto: solo su cifra baja
+C 0x869D el de en medio
+C 0x86A5 el bajo, el ultimo
+C 0x86AC en la fila 22, columna 28
+C 0x86AF LEVEL
+C 0x86B4 el ultimo
+C 0x86B8 una cifra mas
+C 0x86BA la cifra alta
+C 0x86C0 no es 0
+C 0x86C2 un 0: en blanco?
+C 0x86C7 ya hay cifras
+C 0x86C8 la casilla de la cifra
+C 0x86CA WRTVRM
+C 0x86CE la cifra baja
+C 0x86D3 no es 0
+C 0x86D5 un 0: en blanco?
+C 0x86DA ya hay cifras
+C 0x86DD WRTVRM
+C 0x86E2 la ultima cifra...
+C 0x86E5 ...siempre se ve
+C 0x86E9 ya hay cifras?
+C 0x86EF no: 0xF0 + 0x30 = espacio
+C 0x86F5 B = la demostracion
+C 0x86FA en 0xED28
+C 0x8704 en 0xEC5E
+C 0x870D en 0xEFFF
+C 0x8738 las luces
+C 0x873B los tulipanes
+C 0x8744 0x10 en el byte alto (BCD): 100.000
+C 0x874A en 0xEFFF
+C 0x874F las otras dos...
+C 0x8757 ...99.999
+C 0x875D los puntos
+C 0x8767 la resta
+C 0x876C sin final
+C 0x876F el byte alto
+C 0x8776 a 0
+C 0x877C en la pantalla
+C 0x877F las bolas...
+C 0x8782 ...son 0?
+C 0x8786 el final 2
+C 0x878D la maquina 2?
+C 0x8798 los bytes cambiados
+C 0x879E los del objetivo, cambiados
+C 0x87A2 objetivo - bolas
+C 0x87A4 aun no
+C 0x87A9 en marcha: espera
+C 0x87AC el final 1
+C 0x87B0 hay final pendiente?
+C 0x87B8 un cuadro mas...
+C 0x87BC ...192?
+C 0x87C3 de 8 en 8 bytes
+C 0x87C6 ocho bolas
+C 0x87C9 el estado
+C 0x87CD alguna: espera
+C 0x87CE el final...
+C 0x87D1 ...a 0xEFFF
+C 0x87D8 cada 16 cuadros
+C 0x87DE la maquina 2?
+C 0x87E8 4
+C 0x87ED la tabla
+C 0x87F2 en D
+C 0x87F6 las bolas entre 16...
+C 0x8800 10
+C 0x8805 la columna del lanzador, fila 22
+C 0x8809 par o impar...
+C 0x880C ...se suma a la casilla
+C 0x880D 0x21?
+C 0x8811 0x20
+C 0x8818 la maquina 2?
+C 0x881D la cuenta del primero
+C 0x8826 una menos
+C 0x8828 los dos bits altos de la cuenta...
+C 0x882C ...en D: lo que avanza
+C 0x882D el dibujo
+C 0x8832 de 0 a 7
+C 0x8836 el siguiente, 6 bytes mas alla
+C 0x883A los cuatro
+C 0x8840 una menos
+C 0x8844 aun no
+C 0x8845 estado 4...
+C 0x8849 ...y otra vez 40
+C 0x8851 la maquina 2?
+C 0x8857 cada 4 cuadros
+C 0x885E cinco
+C 0x8861 el estado
+C 0x8874 la cuenta
+C 0x887B 1 o 2
+C 0x8881 la cuenta
+C 0x8886 la cuenta
+C 0x888B la X...
+C 0x888E ...menos la velocidad...
+C 0x8895 ...0x30?
+C 0x8899 a la derecha
+C 0x889F la X...
+C 0x88A2 ...mas la velocidad...
+C 0x88A9 ...0x90?
+C 0x88AD a la izquierda
+C 0x88B1 cada 8 cuadros
+C 0x88B8 el dibujo...
+C 0x88BB ...siguiente, de 0 a 3
+C 0x88C1 el siguiente, 5 bytes mas alla
+C 0x88C7 los cinco
+C 0x88CD el OVNI grande: su estado
+C 0x88CF 1: a la derecha
+C 0x88D2 2: a la izquierda
+C 0x88D5 3: estallando, la cuenta
+C 0x88DB al final de la cuenta...
+C 0x88DE ...el final 1: CLEAR
+C 0x88E4 la X, uno menos
+C 0x88EA 0x44?
+C 0x88EE a la derecha
+C 0x88F4 la X, uno mas
+C 0x88FA 0x74?
+C 0x88FE a la izquierda
+C 0x8902 cada 4 cuadros
+C 0x8909 el dibujo...
+C 0x890C ...siguiente, de 0 a 3
+C 0x8912 el paso de la altura...
+C 0x8915 ...de 0 a 31
+C 0x891E la tabla
+C 0x8923 la Y
+C 0x8949 en B
+C 0x894D sumados
+C 0x8950 x 4...
+C 0x8951 ...+ 1: x 5
+C 0x8954 la semilla nueva
+C 0x8959 de 0 a 9...
+C 0x895B ...la casilla de la cifra
+C 0x8961 la maquina 1?
+C 0x8967 premio en marcha?
+C 0x896C cada 4 cuadros
+C 0x8972 ninguna tirada
+C 0x8977 la cuenta, una menos (de 0 a 0x7F)
+C 0x897D 0x70 o mas: aun no gira
+C 0x8982 0x6F: empieza
+C 0x8985 el canal 0...
+C 0x898A ...el giro
+C 0x898E 0: se para
+C 0x8991 una tirada menos
+C 0x8998 el canal 0...
+C 0x899A ...callado
+C 0x89A0 la fila 12, columna 12
+C 0x89A6 la primera gira hasta la cuenta 16
+C 0x89AD la primera cifra...
+C 0x89B0 ...en la pantalla
+C 0x89B7 la segunda hasta la 8
+C 0x89BE la segunda
+C 0x89C5 la tercera hasta el final
+C 0x89C8 la tercera
+C 0x89D1 la cuenta pasa de 17?
+C 0x89D8 el boton 2?
+C 0x89E0 la cuenta a 17: se paran en orden
+C 0x89E4 parado del todo?
+C 0x89EC ninguna aun
+C 0x89F0 la primera...
+C 0x89F2 ...6 o mas?
+C 0x89F5 una
+C 0x89F6 la segunda
+C 0x89FB una mas
+C 0x89FC la tercera
+C 0x8A01 una mas
+C 0x8A03 ninguna?
+C 0x8A06 una: 1 apertura
+C 0x8A0A dos: 6 aperturas
+C 0x8A14 el canal 0: el sonido del premio gordo
+C 0x8A1A 0x80 aperturas
+C 0x8A1D las aperturas...
+C 0x8A20 ...mas B
+C 0x8A24 el premio en marcha
+C 0x8A29 y su cuenta
+C 0x8A2C 8 cuadros
+C 0x8A32 abierto?
+C 0x8A38 premio en marcha?
+C 0x8A3E nada: 8 cuadros
+C 0x8A47 un cuadro menos
+C 0x8A4D abre o cierra
+C 0x8A50 ahora abierto?
+C 0x8A56 cerrado: una apertura menos
+C 0x8A5F abierto: el canal 2...
+C 0x8A61 ...el sonido
+C 0x8A67 quedan?
+C 0x8A6C no: sin premio
+C 0x8A72 el canal 0...
+C 0x8A73 ...callado
+C 0x8A79 y las lamparas apagadas
+C 0x8A7C abierto o cerrado...
+C 0x8A80 ...al reves
+C 0x8A86 48 cuadros
+C 0x8A8B las luces 128 cuadros
+C 0x8A90 la maquina
+C 0x8A96 el 2 no tiene centro
+C 0x8A99 abierto?
+C 0x8A9D tres filas...
+C 0x8A9F ...del centro abierto
+C 0x8AA5 y en el mapa
+C 0x8AA8 una vez mas cerrado...
+C 0x8AAF ...30?
+C 0x8AB3 se acaba el premio
+C 0x8AB7 6 aperturas o mas: sigue abierto
+C 0x8ABF tres filas...
+C 0x8AC1 ...del centro cerrado
+C 0x8AC7 y en el mapa
+C 0x8ACA abierto?
+C 0x8ACE cuatro filas del abierto
+C 0x8AD6 y en el mapa
+C 0x8AD9 cuatro filas del cerrado
+C 0x8AE1 y en el mapa
+C 0x8AE4 las ocho bolas
+C 0x8AEB la Y...
+C 0x8AEE ...entre 0x44...
+C 0x8AF2 ...y 0x4B
+C 0x8AF6 la X...
+C 0x8AF9 ...entre 0x24...
+C 0x8AFD ...y 0x6B
+C 0x8B01 la mitad izquierda?
+C 0x8B05 a la derecha (X 0x50)
+C 0x8B0B a la izquierda (X 0x3B)
+C 0x8B0F la siguiente
+C 0x8B1C saliendo: baja la fuerza
+C 0x8B23 la demostracion?
+C 0x8B28 una fuerza al azar
+C 0x8B35 la fuerza...
+C 0x8B38 ...uno mas...
+C 0x8B39 ...16?
+C 0x8B3D 15
+C 0x8B42 hay final pendiente?
+C 0x8B47 sin fuerza?
+C 0x8B53 los huecos
+C 0x8B5A ocupado?
+C 0x8B6D hacia arriba: -fuerza
+C 0x8B72 hacia el lado: fuerza + 2
+C 0x8B79 la maquina 2: una bola cada vez
+C 0x8B80 el hueco siguiente
+C 0x8B86 4 menos...
+C 0x8B88 ...menos de 0?
+C 0x8B8C 0: ya no sale
+C 0x8B94 la marca 1: en el mapa...
+C 0x8B98 ...y en la pantalla (fila 17, columna 8)
+C 0x8B9E la 2
+C 0x8BA8 la 3
+C 0x8BB9 las casillas
+C 0x8BC1 la fila de arriba
+C 0x8BC6 la de abajo
+C 0x8BD0 ...LDIRVM
+C 0x8BD3 y el poste en el mapa
+C 0x8BD7 tres casillas
+C 0x8BE1 y el tulipan en el mapa
+C 0x8BE7 tres casillas
+C 0x8BF7 tres casillas
+C 0x8C07 960 bytes...
+C 0x8C0A ...a 0x3800
+C 0x8C17 x 2
+C 0x8C1F el lanzador, el primer sprite
+C 0x8C23 la Y...
+C 0x8C27 ...la X
+C 0x8C33 la maquina 2?
+C 0x8C3A cuatro molinillos
+C 0x8C3E Y, X, dibujo y color
+C 0x8C46 el siguiente
+C 0x8C49 las bolas
+C 0x8C4C seis OVNIs
+C 0x8C53 su estado
+C 0x8C56 0: no esta
+C 0x8C5E 4 o mas: no se ve
+C 0x8C66 0: pequeno
+C 0x8C6A 1: mediano
+C 0x8C71 la Y
+C 0x8C73 la X
+C 0x8C78 el paso
+C 0x8C7D el dibujo 0x64...
+C 0x8C81 ...o 0x70
+C 0x8C86 el color 5
+C 0x8C89 el segundo, 16 pixeles a la derecha
+C 0x8C95 el dibujo + 4
+C 0x8C9D el tercero, 8 a la derecha
+C 0x8CA9 el dibujo 0x6C
+C 0x8CAC su color
+C 0x8CB3 el paso...
+C 0x8CB6 ...+ 7...
+C 0x8CB8 ...0 es 6
+C 0x8CBE la Y
+C 0x8CC3 la X
+C 0x8CC8 la cuenta x 2...
+C 0x8CCE ...el dibujo de 0x28 a 0x33
+C 0x8CDF el color 5
+C 0x8CE1 el paso: el dibujo 0x34...
+C 0x8CEA ...o 0x40
+C 0x8CEE el color 13
+C 0x8CF0 el paso: el dibujo 0x4C...
+C 0x8CF9 ...o 0x58
+C 0x8CFB la Y y la X
+C 0x8D05 el primero: dibujo + 4, negro
+C 0x8D0D el segundo: el dibujo, color E
+C 0x8D16 el tercero: dibujo + 8
+C 0x8D1F con el color del paso
+C 0x8D24 el siguiente
+C 0x8D2E ocho bolas
+C 0x8D34 el estado
+C 0x8D39 0x40 o mas: saliendo, no se ve
+C 0x8D3D la Y + 4
+C 0x8D43 la X + 0x24
+C 0x8D49 el dibujo
+C 0x8D4D blanco
+C 0x8D51 la siguiente
+C 0x8D64 32 sprites
+C 0x8D6B las ocho bolas
+C 0x8D72 el estado
+C 0x8D89 la cuenta, uno mas...
+C 0x8D8C ...pasa de 0xFF: a 1, rueda
+C 0x8D93 los clavos
+C 0x8D97 alguno?
+C 0x8D9E el canal 1 suena?
+C 0x8DA3 el clavo
+C 0x8DAA en Y...
+C 0x8DAE ...a la mitad
+C 0x8DB2 al menos 1
+C 0x8DB3 en X...
+C 0x8DB7 ...a la mitad
+C 0x8DBB al menos 1
+C 0x8DBC choca en Y?
+C 0x8DBE la velocidad Y
+C 0x8DC3 hacia abajo y grande?...
+C 0x8DC8 ...a lo mas 3, hacia arriba: rebota
+C 0x8DCC mas el choque
+C 0x8DCE la Y...
+C 0x8DD1 ...arriba de 0x18?
+C 0x8DD3 la gravedad: 1...
+C 0x8DD7 ...o 2
+C 0x8DD9 la velocidad Y
+C 0x8DDC entre 4...
+C 0x8DE0 ...mas la Y
+C 0x8DE6 choca en X?
+C 0x8DE8 la velocidad X
+C 0x8DED hacia la izquierda?...
+C 0x8DF2 ...a lo mas 3, rebota
+C 0x8DF6 mas el choque
+C 0x8DF8 choque en X?
+C 0x8DFC sin choque: la Y...
+C 0x8DFF ...arriba de 0x20?
+C 0x8E03 abajo: nada
+C 0x8E06 la X...
+C 0x8E09 ...a la derecha de 0x49?
+C 0x8E0D arriba a la izquierda: un poco a la derecha cada dos cuadros
+C 0x8E16 con choque: la Y
+C 0x8E19 arriba de 0x18: nada
+C 0x8E1D entre 0x18 y 0x30: azar
+C 0x8E21 entre 0x30 y 0x40: nada
+C 0x8E25 el registro R...
+C 0x8E2A ...+2 o -2
+C 0x8E30 la Y
+C 0x8E33 arriba de 0x18: sin limite
+C 0x8E38 hasta 11...
+C 0x8E3C ...o hasta -10
+C 0x8E40 que lado?
+C 0x8E44 11
+C 0x8E48 -10
+C 0x8E4B la velocidad X
+C 0x8E4E entre 4...
+C 0x8E52 ...mas la X
+C 0x8E58 fuera por la derecha?
+C 0x8E5C hacia donde iba
+C 0x8E5E 0x87
+C 0x8E62 o 0
+C 0x8E65 lo que se separa del centro (X 0x48)
+C 0x8E6C menos de 10: la curva en 0xA1
+C 0x8E75 mas de 0x50: nada
+C 0x8E79 de 0x20 a 0x50: 0xBE menos eso
+C 0x8E7F de 10 a 0x20: 0xA8 menos la mitad
+C 0x8E83 la curva...
+C 0x8E86 ...por encima de la bola?
+C 0x8E8B la bola sobre la curva
+C 0x8E8E de que lado?
+C 0x8E93 hacia la derecha...
+C 0x8E97 ...o hacia la izquierda
+C 0x8E9C la maquina
+C 0x8EA1 el 1
+C 0x8EA5 el 0
+C 0x8EA8 la maquina 2: los cinco OVNIs
+C 0x8EAF el estado del OVNI
+C 0x8EB3 no esta
+C 0x8EB5 3: estallando
+C 0x8EB9 4 o mas: nada
+C 0x8EBC la Y de la bola...
+C 0x8EBF ...contra la del OVNI...
+C 0x8EC5 ...a menos de 12?
+C 0x8EC9 la X de la bola...
+C 0x8ECC ...contra la del OVNI...
+C 0x8ED2 ...a menos de 28?
+C 0x8ED6 su forma
+C 0x8EDB 0: el malo
+C 0x8EDD el canal 2...
+C 0x8EDF ...el sonido
+C 0x8EE5 los puntos del OVNI bueno
+C 0x8EEE un golpe menos para el grande
+C 0x8EF6 aun no
+C 0x8EF8 ya: el OVNI grande se mueve
+C 0x8EFE el canal 2...
+C 0x8F00 ...el sonido
+C 0x8F06 las bolas que quita
+C 0x8F0B una menos
+C 0x8F11 el OVNI estalla...
+C 0x8F15 ...40 cuadros
+C 0x8F19 la bola...
+C 0x8F1D ...se va
+C 0x8F2E el estado del grande
+C 0x8F3B la Y de la bola contra la suya...
+C 0x8F44 ...a menos de 14?
+C 0x8F49 la X...
+C 0x8F52 ...a menos de 28?
+C 0x8F5F los puntos...
+C 0x8F65 ...x 16
+C 0x8F6C estalla...
+C 0x8F70 ...50 cuadros
+C 0x8F74 la bola se va
+C 0x8F7C el final 1
+C 0x8F84 abierto?
+C 0x8F8A la Y, por 16...
+C 0x8F91 ...0x50?
+C 0x8F95 la X...
+C 0x8F98 ...entre 0x20...
+C 0x8F9C ...y 0x6B
+C 0x8FA0 entra
+C 0x8FA3 los cuatro sitios por 16 pixeles
+C 0x8FA6 la X redondeada
+C 0x8FAC la Y redondeada
+C 0x8FB6 cuatro
+C 0x8FB8 la X...
+C 0x8FBD ...y la Y
+C 0x8FC1 el sitio x 2...
+C 0x8FC7 ...en la tabla de saltos
+C 0x8FCC la rutina...
+C 0x8FD0 ...a ella
+C 0x8FD1 el siguiente
+C 0x8FD4 los quince por 4 pixeles
+C 0x8FD7 la Y redondeada
+C 0x8FDD la X redondeada
+C 0x8FE3 quince
+C 0x8FE5 la X...
+C 0x8FEA ...y la Y
+C 0x8FEE el sitio x 2...
+C 0x8FF4 ...en la tabla
+C 0x8FF9 la rutina...
+C 0x8FFD ...a ella
+C 0x8FFE el siguiente
+C 0x9001 ninguno
+C 0x902A el molinillo 1...
+C 0x902D ...gira
+C 0x9030 y sigue con los agujeros
+C 0x9042 el tulipan 1
+C 0x9046 su dibujo...
+C 0x9047 ...el siguiente, de 0 a 3
+C 0x904B la bola entra
+C 0x9056 la maquina 0?
+C 0x905C una apertura
+C 0x905E la V ya cuenta?
+C 0x9064 las aperturas...
+C 0x9067 ...mas B
+C 0x906B premio en marcha
+C 0x9081 dos aperturas
+C 0x9088 la maquina 1?
+C 0x908F una tirada
+C 0x9099 los otros: el tulipan 1 se abre
+C 0x90B2 abierto?
+C 0x90B6 no: sigue
+C 0x90B8 24 cuadros...
+C 0x90BC ...dentro del centro
+C 0x90C0 0x10 bolas y puntos
+C 0x90C6 las luces
+C 0x90D5 abierto?
+C 0x90E0 la V: una mas...
+C 0x90E7 ...8 o mas: como un agujero
+C 0x90EB el canal 0...
+C 0x90ED ...el sonido
+C 0x90F6 su lampara
+C 0x90F9 18 aperturas
+C 0x90FE 0x10 bolas y puntos
+C 0x9104 las luces, 32 cuadros
+C 0x9109 120 cuadros...
+C 0x910D ...cayendo
+C 0x9113 la Y...
+C 0x9118 ...0xA0?
+C 0x911D la X...
+C 0x9122 ...0x40-0x4F?
+C 0x9127 120 cuadros...
+C 0x912B ...cayendo
+C 0x9131 el dibujo...
+C 0x9134 ...siguiente...
+C 0x9136 ...pasa de 0x16?
+C 0x913A 8
+C 0x913F la bola siguiente
+C 0x924A la cuenta...
+C 0x924D ...uno mas
+C 0x9251 36?
+C 0x9256 libre
+C 0x925A 0x0A bolas y puntos
+C 0x9260 las luces
+C 0x928E libre
+C 0x9295 la maquina 2 no tiene tulipanes
+C 0x929B la maquina 0...
+C 0x929C ...los tulipanes (0xEC89)
+C 0x929F dos en la maquina 0...
+C 0x92A3 ...cinco en los otros
+C 0x92A7 activo?
+C 0x92AC su dibujo
+C 0x92AE 0x10 o mas: ya puesto
+C 0x92B2 0: se abre
+C 0x92B5 2: se cierra
+C 0x92BA 1 o 3: a 2...
+C 0x92BE ...guardado
+C 0x92C0 su sitio en el mapa
+C 0x92C5 y en la pantalla
+C 0x92C8 la forma 2
+C 0x92CE con el bit 7: puesto
+C 0x92D3 su sitio en el mapa
+C 0x92D8 y en la pantalla
+C 0x92DB la forma 1
+C 0x92E1 con el bit 7: puesto
+C 0x92E6 su sitio en el mapa
+C 0x92EB y en la pantalla
+C 0x92EE la forma 3
+C 0x92F2 el siguiente, 4 bytes mas alla
+C 0x92F7 todos
+C 0x92FB la Y...
+C 0x92FD ...y la X
+C 0x9300 la Y x 18...
+C 0x9307 ...+ la X...
+C 0x9308 ...+ 0xE000
+C 0x930B en DE
+C 0x930D la Y + 4...
+C 0x9312 ...la X + 5
+C 0x9318 la Y x 4...
+C 0x931B ...redondeada a la fila (x 32 / 8)...
+C 0x9320 ...+ la X / 8...
+C 0x9321 ...+ 0x1800
+C 0x9324 en DE
+C 0x9326 el mapa de los clavos
+C 0x9329 la maquina 0x9614
+C 0x932E el mapa
+C 0x9333 el mapa
+C 0x9336 la maquina
+C 0x9339 en la fila 5, columna 11
+C 0x933C la ventana
+C 0x933F 9 filas
+C 0x9341 5 casillas
+C 0x9347 LDIRVM
+C 0x934D la fila siguiente del dibujo...
+C 0x9351 ...y de la pantalla
+C 0x9356 las nueve
+C 0x935A la maquina 0x93A4
+C 0x935D la pantalla...
+C 0x9360 ...en blanco...
+C 0x9362 ...768 casillas
+C 0x936A desde la fila 0
+C 0x936D 24 filas
+C 0x936F 26 casillas
+C 0x9375 LDIRVM
+C 0x937B la fila siguiente del dibujo...
+C 0x937F ...y de la pantalla
+C 0x9384 las 24
+C 0x9388 en la fila 9, columna 9
+C 0x938B 9 casillas
+C 0x9391 LDIRVM
+C 0x914D la Y...
+C 0x9151 ...x 18...
+C 0x9156 ...mas la X / 8...
+C 0x915F ...mas 0xE000: el byte del mapa
+C 0x9162 los bits de la X dentro del byte, + 1
+C 0x9169 IY = el byte
+C 0x916C sin desviacion
+C 0x916F la primera linea: 16 bits
+C 0x9176 nada?
+C 0x917A corridos hasta la bola
+L 0x917B clavos_corre              ...
+C 0x917E bit 7: hacia abajo y a la derecha
+C 0x9185 bit 6: a la derecha
+C 0x918B bit 5: hacia arriba y a la derecha
+C 0x9192 la linea siguiente (18 bytes)
+C 0x919A sus 16 bits
+C 0x91A1 nada?
+C 0x91A9 el bit que sale: hacia abajo
+C 0x91AF bit 4: hacia arriba
+C 0x91B7 la tercera linea
+C 0x91BE sus 16 bits
+C 0x91CD el bit que sale
+C 0x91D2 bit 4
+C 0x91D9 la cuarta
+C 0x91E0 sus 16 bits
+C 0x91EF el bit que sale: a la izquierda
+C 0x91F4 bit 4
+C 0x91FB la quinta
+C 0x9202 sus 16 bits
+C 0x9211 el bit que sale
+C 0x9217 bit 4
+C 0x921F la sexta
+C 0x9226 sus 16 bits
+C 0x9235 bit 7
+C 0x923C bit 6
+C 0x9242 bit 5
+C 0x9D26 las luces encendidas?
+C 0x9D2C un cuadro menos
+C 0x9D3F el color
+C 0x9D41 cuantos bytes
+C 0x9D48 FILVRM
+C 0x9D4D el tramo siguiente
+C 0x9D50 los diez
+C 0x9D5C (19)
+C 0x9D61 (51)
+C 0x9D67 de 0xA027
+C 0x9D77 de 0xA347
+C 0x9D84 los colores del primer tercio...
+C 0x9D87 ...desde la casilla 0x60
+C 0x9D8A 71 tramos
+C 0x9D8F el segundo
+C 0x9D95 134 tramos
+C 0x9D9A el tercero
+C 0x9DA0 92 tramos
+C 0x9DA7 el color
+C 0x9DA9 cuantos bytes
+C 0x9DB0 FILVRM
+C 0x9DB5 la direccion siguiente
+C 0x9DB8 todos
+C 0x9DC4 una menos
+C 0x9DCB una menos
+C 0x9DCF 8 bytes
+C 0x9DD2 WRTVRM
+C 0x9DDF 8 bytes
+C 0x9DE3 los 8 bits...
+C 0x9DE6 ...al reves en C
+C 0x9DEC WRTVRM
+C 0x9DF3 una menos
+C 0xA815 las letras grandes
+C 0xA818 25 casillas
+C 0xA81B LDIRVM
+C 0xA820 sus colores: 0x2000 + DE
+C 0xA824 256 bytes (FILVRM)
+C 0xA83D en el primer tercio
+C 0xA840 en el segundo
+C 0xA846 y en el tercero
+C 0xA84A las cifras...
+C 0xA84D ...10 casillas
+C 0xA853 LDIRVM a la casilla 0x30
+C 0xA859 las letras...
+C 0xA85A ...en la casilla 0x40...
+C 0xA860 ...28
+C 0xA867 los colores de las casillas 0x20-0x5A...
+C 0xA86E ...blanco sobre negro (0xF1)
+C 0xA875 la casilla 0x5B...
+C 0xA87C ...azul sobre azul (0x55)
+C 0xAA77 el mapa 0xB083
+C 0xAA7C el mapa 0xAB4F
+C 0xAA83 desde 0xE000
+C 0xAA86 un byte a 0
+C 0xAA89 uno menos
+C 0xAA94 9 bytes
+C 0xAA96 tal cual
+C 0xAA9C los mismos...
+C 0xAA9F ...del ultimo al primero
+C 0xAAA4 los bits al reves
+C 0xAAAB en la mitad derecha
+C 0xAAB0 una linea menos
+C 0xAAB4 el mapa de las maquinas 0 y 1
+C 0xAAB7 la ventana del tragaperras...
+C 0xAABA ...en el mapa, linea 40
+C 0xAABD 64 lineas
+C 0xAABF 6 bytes
+C 0xAAC1 un byte
+C 0xAAC8 la linea siguiente (18 - 6)
+C 0xAACC una menos
+C 0xAACF los tres postes
+C 0xAAE1 cerrado
+C 0xAAE6 abierto
+C 0xAAE9 en el mapa
+C 0xAAEC 10 lineas
+C 0xAAEE 10 bytes por linea
+C 0xAB02 la linea siguiente (18 - 10)
+C 0xAB08 una menos
+C 0xAB0C cerrado
+C 0xAB11 abierto
+C 0xAB14 en el mapa
+C 0xAB17 17 lineas
+C 0xAB1B el primero
+C 0xAB20 el segundo
+C 0xAB25 el tercero
+C 0xAB28 8 lineas
+C 0xAB2A 4 bytes por linea
+C 0xAB32 la siguiente (18 - 4)
+C 0xAB38 una menos
+C 0xAB3C el poste
+C 0xAB3F 20 lineas
+C 0xAB41 2 bytes por linea
+C 0xAB45 la siguiente (18 - 2)
+C 0xAB4B una menos
+C 0x8043 un paso...
+C 0x8044 ...hasta que DE sea 0
+C 0x8CD6 el dibujo
+C 0x9D0B la direccion
+C 0x9D10 WRTVRM
+L 0xBA36 sonido_cuadro_uno         Un canal
+C 0xBA36 el canal
+C 0xBA39 el siguiente
+C 0xBA3E el numero de canal...
+C 0xBA42 ...uno menos
+L 0xBA44 canal_cuadro              Un cuadro de un canal: el tempo, la nota y la envolvente
+C 0xBA44 el canal en curso
