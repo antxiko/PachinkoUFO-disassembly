@@ -39,6 +39,13 @@ left.
 
 ![Machine 1 being played](imagenes/maquina1.gif)
 
+In the recorded game no ball went into the slot machine's pocket, so the spin is **forced**
+(`tools/guiones/tragaperras.tcl`): a hook sets machine 1 when the game starts and after 700 frames it is given a spin
+(0xEC84 = 1), as if a ball had gone in. The rest is the game: the figures roll for about 350 frames, the pilot's button
+2 stops them one after the other and they come out 0, 5 and 5: none reaches 6 and there is no prize.
+
+![A slot machine spin (forced)](imagenes/tragaperras.gif)
+
 ## Machine 2: the UFOs
 
 ![Machine 2, recorded in openMSX](imagenes/maquina2.png)

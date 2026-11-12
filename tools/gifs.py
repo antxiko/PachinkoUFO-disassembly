@@ -23,12 +23,16 @@ TRAMOS = [
     ("pattern_clear.gif", "larga", 10100, 10470, 2),  # las bolas pasan del objetivo: PATTERN CLEAR (10167)
     ("maquina1.gif", "larga", 12000, 12360, 2),       # la maquina 1, la del tragaperras
     ("ovnis.gif", "larga", 17212, 17930, 2),          # la maquina 2: los OVNIs, el grande tocado y LEVEL CLEAR
+    ("tragaperras.gif", "tragaperras", 740, 1180, 2), # FORZADA (tools/guiones/tragaperras.tcl): una tirada, gira y para
 ]
 
 
 def main(salida):
     raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    solo = sys.argv[2:]
     for fichero, grab, desde, hasta, cada in TRAMOS:
+        if solo and grab not in solo:
+            continue
         n, s = vdp.gif(os.path.join(raiz, "work", grab + ".bin"),
                        os.path.join(salida, fichero), desde, hasta, cada=cada, tope_ms=4000)
         print("%-20s %4d imagenes, %5.1f s, %8d bytes" % (

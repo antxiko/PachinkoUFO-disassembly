@@ -39,6 +39,13 @@ quede.
 
 ![Jugando a la máquina 1](../imagenes/maquina1.gif)
 
+En la partida grabada ninguna bola entró en el agujero del tragaperras, así que la tirada está **forzada**
+(`tools/guiones/tragaperras.tcl`): un gancho pone la máquina 1 al empezar la partida y a los 700 cuadros se le da una
+tirada (0xEC84 = 1), como si hubiera entrado una bola. Lo demás es el juego: las cifras giran unos 350 cuadros, el
+botón 2 del piloto las para una tras otra y salen 0, 5 y 5: ninguna llega a 6 y no hay premio.
+
+![Una tirada del tragaperras (forzada)](../imagenes/tragaperras.gif)
+
 ## La máquina 2: los OVNIs
 
 ![La máquina 2, grabada en openMSX](../imagenes/maquina2.png)
