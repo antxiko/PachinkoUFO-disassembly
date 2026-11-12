@@ -5,8 +5,8 @@
 ![Las primeras bolas de una partida, cada una con su fuerza](../imagenes/lanzamiento.gif)
 
 El lanzador está abajo a la izquierda; cuanto más se sostiene el botón 1, más alto sube la bola.
-Las bolas son sprites blancos; la fuerza se ve también en una casilla al pie del lanzador, junto a
-las bolas de la bandeja (`fuerza_pinta`, 0x87D5).
+Las bolas son sprites blancos. Debajo de la máquina, en el centro, la bandeja se llena de bolas:
+una casilla cada 16 bolas y una capa más cada 256, contadas en binario (`bandeja_pinta`, 0x87D5).
 
 ## La máquina 0: el centro que se abre
 

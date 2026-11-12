@@ -23,7 +23,7 @@ sirve para pintar las bolas de la bandeja, se lleva 16.
 ## Código que también es dibujo
 
 Las casillas del tercer tercio se cargan de una vez desde 0xA347, y el bloque llega más allá: la
-tabla de la fuerza del lanzador (0xA4E7), dos rutinas cortas (0xA507 y 0xA517) y los bytes de
+tabla de las casillas de la bandeja (0xA4E7), dos rutinas cortas (0xA507 y 0xA517) y los bytes de
 detrás también van a la VRAM como dibujo de casillas.
 
 ## Código y bytes que nadie usa

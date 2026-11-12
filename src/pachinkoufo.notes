@@ -359,15 +359,15 @@ C 0x872C las bolas
 C 0x872F los molinillos
 C 0x8732 los OVNIs de la maquina 2
 C 0x8735 los sprites
-C 0x873E la fuerza en la pantalla
+C 0x873E la bandeja en la pantalla
 C 0x8741 el record llega a 100.000?...
 C 0x8748 ...se acaba la partida (3)...
 C 0x874D ...con 99.999 (se ven cinco cifras)...
 C 0x875A ...en la pantalla
-L 0x8760 juego_mil                 Con 1000 bolas justas, nada de final
+L 0x8760 juego_diez                Con 10 bolas justas (LD HL lee el BCD al reves: 0x1000 son 0x00 0x10), nada de final: la bola que entra sin bolas salva la partida
 C 0x8760 las bolas...
-C 0x8763 ...1000?
-L 0x876F juego_9000                9000 o mas: vuelven a 0
+C 0x8763 ...10? (0x00 0x10 leido al reves)
+L 0x876F juego_9000                9000 o mas: vuelven a 0 (y sin bolas, GAME OVER)
 C 0x8772 9000?
 L 0x877F juego_sin_bolas           Sin bolas: el final 2 (GAME OVER)
 L 0x878D juego_objetivo            Mas bolas que el objetivo y sin premio en marcha: el final 1 (CLEAR); la maquina 2 no tiene objetivo
@@ -376,20 +376,20 @@ C 0x879B el objetivo
 C 0x87A1 el objetivo menos las bolas
 C 0x87A6 hay premio en marcha?
 L 0x87B0 juego_final               Con un final pendiente: cuando no queda ninguna bola en juego (o pasan 192 cuadros), a 0xEFFF
-C 0x87B5 la cuenta del final
+C 0x87B5 la cuenta del final (0xED32): no vuelve a 0 hasta la maquina siguiente, ni despues de la bola que salva
 C 0x87C0 las ocho bolas...
 L 0x87C9 juego_final_bola          ...alguna en juego?
 L 0x87CE juego_final_va            El final
-L 0x87D5 fuerza_pinta              Cada 16 cuadros, la fuerza y las bolas en la casilla del lanzador
+L 0x87D5 bandeja_pinta             Cada 16 cuadros, una casilla de la bandeja de abajo: el sitio, las bolas en binario entre 16 (0-10); la capa, entre 256 (0-4)
 C 0x87D5 cada 16 cuadros
 C 0x87DB la maquina 2 no
-C 0x87E1 lo que se ha cargado...
+C 0x87E1 el byte alto de las bolas en binario (0xEC7E): las capas...
 C 0x87E4 ...no mas de 4
-L 0x87EA fuerza_casilla            La casilla de la tabla 0xA4E7...
+L 0x87EA bandeja_casilla           La casilla de la tabla 0xA4E7...
 C 0x87F3 ...y las bolas entre 16...
 C 0x87FC ...no mas de 10...
-L 0x8802 fuerza_sitio              ...el sitio en la pantalla
-L 0x8812 fuerza_pon                WRTVRM
+L 0x8802 bandeja_sitio             ...el sitio en la pantalla
+L 0x8812 bandeja_pon               WRTVRM
 L 0x8815 molinillos                Los cuatro molinillos (0xEC64, 6 bytes): mientras les queda cuenta, giran mas deprisa al principio
 C 0x8815 la maquina 2 no tiene
 C 0x881B cuatro
@@ -718,9 +718,9 @@ D 0x9DF7 0xA027 casillas_tercio1  Las casillas del primer tercio; en 0x9FC7, den
 F 0x9DF7 8
 D 0xA027 0xA347 casillas_tercio2  Las casillas del segundo tercio
 F 0xA027 8
-D 0xA347 0xA4E7 casillas_tercio3  Las casillas del tercer tercio (la lectura sigue por la tabla de la fuerza y el codigo de 0xA507)
+D 0xA347 0xA4E7 casillas_tercio3  Las casillas del tercer tercio (la lectura sigue por la tabla de la bandeja y el codigo de 0xA507)
 F 0xA347 8
-D 0xA4E7 0xA507 fuerza_tabla  Las casillas de la fuerza en el lanzador (5) y 27 bytes mas que lee la carga de casillas
+D 0xA4E7 0xA507 bandeja_tabla  Las casillas de la bandeja, una por capa (5), y 27 bytes mas que lee la carga de casillas
 F 0xA4E7 5,9,9,9
 L 0xA507 pantalla_borra            La tabla de nombres llena de A
 L 0xA517 sprites_fuera             El primer sprite con Y = 0xD0: ninguno se ve

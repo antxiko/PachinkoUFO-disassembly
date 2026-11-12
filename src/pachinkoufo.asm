@@ -1111,10 +1111,10 @@ juego_cuadro:		; Las partes del cuadro
 	call sprites		;8735   ; los sprites
 	call luces		;8738   ; las luces
 	call tulipanes		;873b   ; los tulipanes
-	call fuerza_pinta		;873e   ; la fuerza en la pantalla
+	call bandeja_pinta		;873e   ; la bandeja en la pantalla
 	ld a,(0ec50h)		;8741   ; el record llega a 100.000?...
 	cp 010h		;8744   ; 0x10 en el byte alto (BCD): 100.000
-	jr c,juego_mil		;8746
+	jr c,juego_diez		;8746
 	ld a,003h		;8748   ; ...se acaba la partida (3)...
 	ld (0efffh),a		;874a   ; en 0xEFFF
 	ld a,099h		;874d   ; ...con 99.999 (se ven cinco cifras)...
@@ -1124,15 +1124,15 @@ juego_cuadro:		; Las partes del cuadro
 	ld (0ec50h),a		;8757   ; ...99.999
 	call pinta_record		;875a   ; ...en la pantalla
 	call pinta_puntos		;875d   ; los puntos
-juego_mil:		; Con 1000 bolas justas, nada de final
+juego_diez:		; Con 10 bolas justas (LD HL lee el BCD al reves: 0x1000 son 0x00 0x10), nada de final: la bola que entra sin bolas salva la partida
 	ld hl,(0ed2eh)		;8760   ; las bolas...
-	ld de,01000h		;8763   ; ...1000?
+	ld de,01000h		;8763   ; ...10? (0x00 0x10 leido al reves)
 	or a			;8766
 	sbc hl,de		;8767   ; la resta
 	jr nz,juego_9000		;8769
 	xor a			;876b
 	ld (0ed2ah),a		;876c   ; sin final
-juego_9000:		; 9000 o mas: vuelven a 0
+juego_9000:		; 9000 o mas: vuelven a 0 (y sin bolas, GAME OVER)
 	ld a,(0ed2eh)		;876f   ; el byte alto
 	cp 090h		;8772   ; 9000?
 	jr c,juego_sin_bolas		;8774
@@ -1171,7 +1171,7 @@ juego_final:		; Con un final pendiente: cuando no queda ninguna bola en juego (o
 	ld a,(0ed2ah)		;87b0   ; hay final pendiente?
 	or a			;87b3
 	ret z			;87b4
-	ld a,(0ed32h)		;87b5   ; la cuenta del final
+	ld a,(0ed32h)		;87b5   ; la cuenta del final (0xED32): no vuelve a 0 hasta la maquina siguiente, ni despues de la bola que salva
 	inc a			;87b8   ; un cuadro mas...
 	ld (0ed32h),a		;87b9
 	cp 0c0h		;87bc   ; ...192?
@@ -1189,18 +1189,18 @@ juego_final_va:		; El final
 	ld a,(0ed2ah)		;87ce   ; el final...
 	ld (0efffh),a		;87d1   ; ...a 0xEFFF
 	ret			;87d4
-fuerza_pinta:		; Cada 16 cuadros, la fuerza y las bolas en la casilla del lanzador
+bandeja_pinta:		; Cada 16 cuadros, una casilla de la bandeja de abajo: el sitio, las bolas en binario entre 16 (0-10); la capa, entre 256 (0-4)
 	ld a,(0ed28h)		;87d5   ; cada 16 cuadros
 	and 00fh		;87d8   ; cada 16 cuadros
 	ret nz			;87da
 	ld a,(0ec5ah)		;87db   ; la maquina 2 no
 	cp 002h		;87de   ; la maquina 2?
 	ret z			;87e0
-	ld a,(0ec7eh)		;87e1   ; lo que se ha cargado...
+	ld a,(0ec7eh)		;87e1   ; el byte alto de las bolas en binario (0xEC7E): las capas...
 	cp 005h		;87e4   ; ...no mas de 4
-	jr c,fuerza_casilla		;87e6
+	jr c,bandeja_casilla		;87e6
 	ld a,004h		;87e8   ; 4
-fuerza_casilla:		; La casilla de la tabla 0xA4E7...
+bandeja_casilla:		; La casilla de la tabla 0xA4E7...
 	ld c,a			;87ea
 	ld b,000h		;87eb
 	ld hl,0a4e7h		;87ed   ; la tabla
@@ -1214,9 +1214,9 @@ fuerza_casilla:		; La casilla de la tabla 0xA4E7...
 	rrca			;87f9
 	and 00fh		;87fa
 	cp 00bh		;87fc   ; ...no mas de 10...
-	jr c,fuerza_sitio		;87fe
+	jr c,bandeja_sitio		;87fe
 	ld a,00ah		;8800   ; 10
-fuerza_sitio:		; ...el sitio en la pantalla
+bandeja_sitio:		; ...el sitio en la pantalla
 	ld c,a			;8802
 	ld b,000h		;8803
 	ld hl,01ac8h		;8805   ; la columna del lanzador, fila 22
@@ -1225,9 +1225,9 @@ fuerza_sitio:		; ...el sitio en la pantalla
 	and 001h		;880a
 	add a,d			;880c   ; ...se suma a la casilla
 	cp 021h		;880d   ; 0x21?
-	jr nz,fuerza_pon		;880f
+	jr nz,bandeja_pon		;880f
 	dec a			;8811   ; 0x20
-fuerza_pon:		; WRTVRM
+bandeja_pon:		; WRTVRM
 	jp 0004dh		;8812
 molinillos:		; Los cuatro molinillos (0xEC64, 6 bytes): mientras les queda cuenta, giran mas deprisa al principio
 	ld a,(0ec5ah)		;8815   ; la maquina 2 no tiene
@@ -3556,7 +3556,7 @@ DATA_casillas_tercio2:
 
 ; ----------------------------------------------------------------------
 ; DATOS casillas_tercio3: Las casillas del tercer tercio (la lectura sigue por
-;   la tabla de la fuerza y el codigo de 0xA507)
+;   la tabla de la bandeja y el codigo de 0xA507)
 ;   0xa347..0xa4e7  (416 bytes)
 DATA_casillas_tercio3:
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; a347  ........
@@ -3613,10 +3613,10 @@ DATA_casillas_tercio3:
 	defb 001h,001h,080h,080h,000h,000h,000h,000h	; a4df  ........
 
 ; ----------------------------------------------------------------------
-; DATOS fuerza_tabla: Las casillas de la fuerza en el lanzador (5) y 27 bytes
-;   mas que lee la carga de casillas
+; DATOS bandeja_tabla: Las casillas de la bandeja, una por capa (5), y 27
+;   bytes mas que lee la carga de casillas
 ;   0xa4e7..0xa507  (32 bytes)
-DATA_fuerza_tabla:
+DATA_bandeja_tabla:
 	defb 020h,07ch,07eh,083h,085h	; a4e7
 	defb 000h,000h,000h,003h,001h,001h,080h,080h,0c0h	; a4ec  .........
 	defb 0e0h,0e0h,080h,080h,0c0h,0c0h,0c0h,0c0h,0c0h	; a4f5  .........

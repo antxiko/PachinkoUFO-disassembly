@@ -89,7 +89,12 @@ PAGINAS = [
     [("CURIOSITIES.html", "CURIOSIDADES.html", "Curiosities", "Curiosidades",
       "a machine drawn in half, a sound hidden among the tiles, ten that are sixteen and the code nobody calls",
       "una m&aacute;quina dibujada a medias, un sonido escondido entre las casillas, diez que son diecis&eacute;is "
-      "y el c&oacute;digo que nadie llama")],
+      "y el c&oacute;digo que nadie llama"),
+     ("SECRETS-AND-BUGS.html", "SECRETOS-Y-FALLOS.html", "Secrets and bugs", "Secretos y fallos",
+      "what was searched for: no hidden keys, the ball that saves the game (only with exactly 10), GAME OVER at 9,000 "
+      "balls and the wait that is not reset",
+      "lo que se ha buscado: ninguna tecla escondida, la bola que salva la partida (solo con 10 justas), el GAME OVER "
+      "con 9.000 bolas y la espera que no vuelve a cero")],
     [("UNDER-THE-HOOD.html", "POR-DENTRO.html", "Under the hood", "Por dentro",
       "rebuilding the ROM, the BIOS it uses, the interrupt, the texts behind the calls, the RAM and the tools",
       "rehacer la ROM, la BIOS que usa, la interrupci&oacute;n, los textos detr&aacute;s de las llamadas, la "

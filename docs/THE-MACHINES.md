@@ -5,8 +5,8 @@
 ![The first balls of a game, each with its strength](imagenes/lanzamiento.gif)
 
 The launcher is at the bottom left; the longer button 1 is held, the higher the ball goes. The
-balls are white sprites; the strength also shows in a tile at the foot of the launcher, next to
-the balls in the tray (`fuerza_pinta`, 0x87D5).
+balls are white sprites. Below the machine, in the middle, the tray fills up with balls: one tile
+every 16 balls and one more layer every 256, counted in binary (`bandeja_pinta`, 0x87D5).
 
 ## Machine 0: the centre that opens
 

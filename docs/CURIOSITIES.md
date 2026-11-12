@@ -24,7 +24,7 @@ used to draw the balls in the tray, gets 16.
 ## Code that is also drawing
 
 The tiles of the third third are loaded in one go from 0xA347, and the block reaches beyond
-them: the table of the launcher's strength (0xA4E7), two short routines (0xA507 and 0xA517) and
+them: the table of the tray tiles (0xA4E7), two short routines (0xA507 and 0xA517) and
 the bytes after them are copied into the VRAM as tile drawings too.
 
 ## Code and bytes nobody uses
